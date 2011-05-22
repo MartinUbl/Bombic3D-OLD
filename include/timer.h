@@ -3,10 +3,15 @@
 
 #include <game_inc.h>
 
-/* Trida casovace, pro rizeni hernich mechanismu a prizpusobeni
- * starsim pocitacum (celkova rychlost bude stejna, ale na starsich
- * zelezech se bude obraz "trhat" pokud nedosahnou urcite rychlosti)
- */
+struct TimerRecord
+{
+    uint32 maxtime; //milisekundy
+    uint32 remaintime; //milisekundy
+    uint32 param1;
+    uint32 param2;
+    void (*Handler)(uint32 param1, uint32 param2);
+};
+
 class Timer
 {
 public:
@@ -14,18 +19,16 @@ public:
     ~Timer() {};
 
     void Initialize();
-    uint64 GetTime();
-protected:
-    int64  frequency;      // frekvence
-    float  resolution;     // perioda ticku
-    uint64 timer_start;    // cas odstartovani casovace
-    uint64 timer_elapsed;  // cas ktery uplynul od startu
-    bool   ptimer;         // performance timer?
-    int64  ptimer_start;   // cas odstartovani performance timeru
-    int64  ptimer_elapsed; // cas ktery uplynul u performance timeru
-};
+    void Update(clock_t diff);
 
-static const uint32 steps[] = {1, 2, 4, 6, 8, 10};
+    void AddTimedEvent(uint32 time, void (*Handler)(uint32, uint32),uint32 param1, uint32 param2);
+
+    void SetDiff(clock_t diff) { m_diff = diff; };
+    clock_t GetDiff() { return m_diff; };
+protected:
+    clock_t m_diff;
+    std::list<TimerRecord> TimedEvents;
+};
 
 extern Timer gTimer;
 

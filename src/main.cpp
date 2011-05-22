@@ -263,6 +263,7 @@ int DrawGLScene(GLvoid)
     lasttime = clock();
     gDisplay.SetDiff(diff);
     gDisplay.DoTick();
+    gTimer.Update(diff);
 
     return TRUE;
 }
@@ -600,12 +601,12 @@ int WINAPI WinMain(    HINSTANCE    hInstance,
         }
         else
         {
-            uint64 StartTime = gTimer.GetTime();
+            //uint64 StartTime = gTimer.GetTime();
 
             // Nutne prepracovat s podporou vice vlaken!
-            while(gTimer.GetTime() < StartTime + float(steps[0] * 2.0f))
-            {
-            }
+            //while(gTimer.GetTime() < StartTime + float(steps[0] * 2.0f))
+            //{
+            //}
 
             if((active && !DrawGLScene()) || gInterface.IsKeyPressed(VK_ESCAPE))
             {

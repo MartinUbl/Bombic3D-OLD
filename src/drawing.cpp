@@ -440,24 +440,24 @@ void Display::DrawMap()
                     glTexCoord2f(1.0f, 0.0f); glVertex3f((px-1)*MAP_SCALE_X, 4*MAP_SCALE_Y, (py  )*MAP_SCALE_Z);
                     // levobok
                     glTexCoord2f(1.0f, 1.0f); glVertex3f((px-1)*MAP_SCALE_X, 4*MAP_SCALE_Y, (py-1)*MAP_SCALE_Z);
-                    glTexCoord2f(0.0f, 0.0f); glVertex3f((px-1)*MAP_SCALE_X, 0*MAP_SCALE_Y, (py-1)*MAP_SCALE_Z);
-                    glTexCoord2f(0.0f, 1.0f); glVertex3f((px-1)*MAP_SCALE_X, 0*MAP_SCALE_Y, (py)*MAP_SCALE_Z);
-                    glTexCoord2f(1.0f, 0.0f); glVertex3f((px-1)*MAP_SCALE_X, 4*MAP_SCALE_Y, (py)*MAP_SCALE_Z);
+                    glTexCoord2f(1.0f, 0.0f); glVertex3f((px-1)*MAP_SCALE_X, 0*MAP_SCALE_Y, (py-1)*MAP_SCALE_Z);
+                    glTexCoord2f(0.0f, 0.0f); glVertex3f((px-1)*MAP_SCALE_X, 0*MAP_SCALE_Y, (py)*MAP_SCALE_Z);
+                    glTexCoord2f(0.0f, 1.0f); glVertex3f((px-1)*MAP_SCALE_X, 4*MAP_SCALE_Y, (py)*MAP_SCALE_Z);
                     // pravobok
                     glTexCoord2f(1.0f, 1.0f); glVertex3f((px)*MAP_SCALE_X, 4*MAP_SCALE_Y, (py)*MAP_SCALE_Z);
-                    glTexCoord2f(0.0f, 0.0f); glVertex3f((px)*MAP_SCALE_X, 0*MAP_SCALE_Y, (py)*MAP_SCALE_Z);
-                    glTexCoord2f(0.0f, 1.0f); glVertex3f((px)*MAP_SCALE_X, 0*MAP_SCALE_Y, (py-1)*MAP_SCALE_Z);
-                    glTexCoord2f(1.0f, 0.0f); glVertex3f((px)*MAP_SCALE_X, 4*MAP_SCALE_Y, (py-1)*MAP_SCALE_Z);
+                    glTexCoord2f(1.0f, 0.0f); glVertex3f((px)*MAP_SCALE_X, 0*MAP_SCALE_Y, (py)*MAP_SCALE_Z);
+                    glTexCoord2f(0.0f, 0.0f); glVertex3f((px)*MAP_SCALE_X, 0*MAP_SCALE_Y, (py-1)*MAP_SCALE_Z);
+                    glTexCoord2f(0.0f, 1.0f); glVertex3f((px)*MAP_SCALE_X, 4*MAP_SCALE_Y, (py-1)*MAP_SCALE_Z);
                     // predni
                     glTexCoord2f(1.0f, 1.0f); glVertex3f((px-1)*MAP_SCALE_X, 4*MAP_SCALE_Y, (py)*MAP_SCALE_Z);
-                    glTexCoord2f(0.0f, 0.0f); glVertex3f((px-1)*MAP_SCALE_X, 0*MAP_SCALE_Y, (py)*MAP_SCALE_Z);
-                    glTexCoord2f(0.0f, 1.0f); glVertex3f((px)*MAP_SCALE_X, 0*MAP_SCALE_Y, (py)*MAP_SCALE_Z);
-                    glTexCoord2f(1.0f, 0.0f); glVertex3f((px)*MAP_SCALE_X, 4*MAP_SCALE_Y, (py)*MAP_SCALE_Z);
+                    glTexCoord2f(1.0f, 0.0f); glVertex3f((px-1)*MAP_SCALE_X, 0*MAP_SCALE_Y, (py)*MAP_SCALE_Z);
+                    glTexCoord2f(0.0f, 0.0f); glVertex3f((px)*MAP_SCALE_X, 0*MAP_SCALE_Y, (py)*MAP_SCALE_Z);
+                    glTexCoord2f(0.0f, 1.0f); glVertex3f((px)*MAP_SCALE_X, 4*MAP_SCALE_Y, (py)*MAP_SCALE_Z);
                     // zadni
                     glTexCoord2f(1.0f, 1.0f); glVertex3f((px-1)*MAP_SCALE_X, 4*MAP_SCALE_Y, (py-1)*MAP_SCALE_Z);
-                    glTexCoord2f(0.0f, 0.0f); glVertex3f((px-1)*MAP_SCALE_X, 0*MAP_SCALE_Y, (py-1)*MAP_SCALE_Z);
-                    glTexCoord2f(0.0f, 1.0f); glVertex3f((px)*MAP_SCALE_X, 0*MAP_SCALE_Y, (py-1)*MAP_SCALE_Z);
-                    glTexCoord2f(1.0f, 0.0f); glVertex3f((px)*MAP_SCALE_X, 4*MAP_SCALE_Y, (py-1)*MAP_SCALE_Z);
+                    glTexCoord2f(1.0f, 0.0f); glVertex3f((px-1)*MAP_SCALE_X, 0*MAP_SCALE_Y, (py-1)*MAP_SCALE_Z);
+                    glTexCoord2f(0.0f, 0.0f); glVertex3f((px)*MAP_SCALE_X, 0*MAP_SCALE_Y, (py-1)*MAP_SCALE_Z);
+                    glTexCoord2f(0.0f, 1.0f); glVertex3f((px)*MAP_SCALE_X, 4*MAP_SCALE_Y, (py-1)*MAP_SCALE_Z);
                 glEnd();
             }
         }

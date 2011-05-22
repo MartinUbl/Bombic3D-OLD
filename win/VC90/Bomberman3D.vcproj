@@ -190,6 +190,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\gameplay.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\interface.cpp"
 				>
 			</File>
@@ -243,6 +247,10 @@
 			</File>
 			<File
 				RelativePath="..\..\include\game_inc.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\gameplay.h"
 				>
 			</File>
 			<File

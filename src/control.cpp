@@ -1,5 +1,6 @@
 #include <game_inc.h>
 #include <math.h>
+#include <gameplay.h>
 
 //Pri stisknuti klavesy
 void Interface::KeyPress(uint8 key)
@@ -56,7 +57,7 @@ void Interface::MouseBtnPress(MouseButton btn, uint32 x, uint32 y)
         mousedown_x = x;
         mousedown_y = y;
 
-        gDisplay.PlantBomb();
+        gGamePlay.PlantBomb();
 
         /* Projdou se vsechny UI prvky a postupne se vyzkousi, zdali si kliknuti
          * zpracuji. Pokud ano, cyklus se prerusi, protoze staci osefovat kliknuti
