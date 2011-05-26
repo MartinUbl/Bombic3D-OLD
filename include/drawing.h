@@ -190,8 +190,9 @@ public:
         NeededFloorTextures.clear();
         FloorTextures.clear();
         TextDisplayList.clear();
-        ModelDisplayList = (ModelDisplayListRecord*)malloc(sizeof(ModelDisplayListRecord));
-        ModelDisplayListSize = 0;
+        //ModelDisplayList = (ModelDisplayListRecord*)malloc(sizeof(ModelDisplayListRecord));
+        //ModelDisplayListSize = 0;
+        ModelDisplayList.clear();
     };
     ~DisplayStore() {};
 
@@ -235,9 +236,9 @@ public:
     //Display list pro text
     std::vector<TextDisplayListRecord*> TextDisplayList;
     //Display list pro modely
-    //std::vector<ModelDisplayListRecord*> ModelDisplayList;
-    ModelDisplayListRecord* ModelDisplayList;
-    uint32 ModelDisplayListSize;
+    std::vector<ModelDisplayListRecord*> ModelDisplayList;
+    //ModelDisplayListRecord* ModelDisplayList;
+    //uint32 ModelDisplayListSize;
 
     t3DSLoader ModelLoader;
 };

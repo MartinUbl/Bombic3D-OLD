@@ -68,12 +68,9 @@ void Display::InitModelDisplayList()
     temp->rotate = 0.0f;
     temp->Animation = ANIM_IDLE;
     temp->AnimProgress = gDataStore.ModelData[PlayerModelId].AnimData[ANIM_IDLE].first;
-    //gDisplayStore.ModelDisplayList.push_back(temp);
-    //PlayerModelListId = gDisplayStore.ModelDisplayList.size()-1;
-    gDisplayStore.ModelDisplayList = (ModelDisplayListRecord*)realloc(gDisplayStore.ModelDisplayList,(gDisplayStore.ModelDisplayListSize+1)*sizeof(ModelDisplayListRecord));
-    gDisplayStore.ModelDisplayList[gDisplayStore.ModelDisplayListSize] = *temp;
-    gDisplayStore.ModelDisplayListSize += 1;
-    PlayerModelListId = gDisplayStore.ModelDisplayListSize-1;
+    gDisplayStore.ModelDisplayList.push_back(temp);
+    PlayerModelListId = gDisplayStore.ModelDisplayList.size()-1;
+    //PlayerModelListId = gDisplayStore.ModelDisplayListSize-1;
 }
 
 //Aktualizace zobrazeni (v promenne diff ulozen cas od posledni aktualizace)
@@ -180,7 +177,7 @@ float Display::CalculateFloatXCoef()
 
 void Display::UpdatePlayerModelPosition()
 {
-    ModelDisplayListRecord* mdl = &gDisplayStore.ModelDisplayList[PlayerModelListId];
+    ModelDisplayListRecord* mdl = gDisplayStore.ModelDisplayList[PlayerModelListId];
 
     mdl->x = ( -view_x                           )/MAP_SCALE_X;
     mdl->y = ( -view_y - DEFAULT_MIN_VIEW_HEIGHT )/MAP_SCALE_Y;
@@ -190,7 +187,7 @@ void Display::UpdatePlayerModelPosition()
 
 void Display::SetPlayerAnim(AnimType Animation)
 {
-    gDisplayStore.ModelDisplayList[PlayerModelListId].Animation = Animation;
+    gDisplayStore.ModelDisplayList[PlayerModelListId]->Animation = Animation;
 }
 
 //Vykresli model modelid na souradnice x,y,z
@@ -206,10 +203,10 @@ ModelDisplayListRecord* Display::DrawModel(float x, float y, float z, uint32 mod
     temp->collision = collision;
     temp->Animation = Animation;
     temp->AnimProgress = gDataStore.ModelData[modelid].AnimData[Animation].first;
-    //gDisplayStore.ModelDisplayList.push_back(temp);
-    gDisplayStore.ModelDisplayList = (ModelDisplayListRecord*)realloc(gDisplayStore.ModelDisplayList,(gDisplayStore.ModelDisplayListSize+1)*sizeof(ModelDisplayListRecord));
-    gDisplayStore.ModelDisplayList[gDisplayStore.ModelDisplayListSize] = *temp;
-    gDisplayStore.ModelDisplayListSize += 1;
+    gDisplayStore.ModelDisplayList.push_back(temp);
+    //gDisplayStore.ModelDisplayList = (ModelDisplayListRecord*)realloc(gDisplayStore.ModelDisplayList,(gDisplayStore.ModelDisplayListSize+1)*sizeof(ModelDisplayListRecord));
+    //gDisplayStore.ModelDisplayList[gDisplayStore.ModelDisplayListSize] = *temp;
+    //gDisplayStore.ModelDisplayListSize += 1;
 
     return temp;
 }
@@ -220,10 +217,11 @@ void Display::DrawModels()
     ModelDisplayListRecord* temp = NULL;
     uint32 AnimFirst, AnimLast;
 
-    //for(std::vector<ModelDisplayListRecord*>::iterator itr = gDisplayStore.ModelDisplayList.begin(); itr != gDisplayStore.ModelDisplayList.end(); ++itr)
-    for(int i = 0; i < gDisplayStore.ModelDisplayListSize; i++)
+    for(std::vector<ModelDisplayListRecord*>::iterator itr = gDisplayStore.ModelDisplayList.begin(); itr != gDisplayStore.ModelDisplayList.end(); ++itr)
+    //for(int i = 0; i < gDisplayStore.ModelDisplayListSize; i++)
     {
-        temp = &gDisplayStore.ModelDisplayList[i];
+        //temp = &gDisplayStore.ModelDisplayList[i];
+        temp = *itr;
 
         x = temp->x*MAP_SCALE_X;
         y = temp->y*MAP_SCALE_Y;
@@ -360,8 +358,8 @@ void Display::FlushTextDisplayList()
 
 void Display::FlushModelDisplayList()
 {
-    //gDisplayStore.ModelDisplayList.clear();
-    free(gDisplayStore.ModelDisplayList);
+    gDisplayStore.ModelDisplayList.clear();
+    //free(gDisplayStore.ModelDisplayList);
 }
 
 void Display::UpdateGroundPosition()
