@@ -114,7 +114,6 @@ public:
 
     //Organizacni funkce
     void BindMapDefaultTexture();
-    void UpdateGroundPosition();
     void UpdatePlayerModelPosition();
 
     //Objekt hrace
@@ -203,6 +202,7 @@ public:
 
     //Nacitani jednotlivych textur ze souboru
     AUX_RGBImageRec* LoadBMP(char *Filename);
+    void LoadJPG(char* filename, unsigned int * textureID);
 
     //Nacitani textur do pameti (podle listu potrebnych textur)
     void LoadFloorTextures();

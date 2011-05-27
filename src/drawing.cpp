@@ -4,7 +4,7 @@
 #define MODPOS_X ((GLfloat)sin(h_angle*(PI/180)) * PLAYER_VIEW_DISTANCE)
 #define MODPOS_Z ((GLfloat)cos(h_angle*(PI/180)) * PLAYER_VIEW_DISTANCE)
 
-Display gDisplay;     //hlavni deklarovana ridici display class
+Display gDisplay;           //hlavni deklarovana ridici display class
 DisplayStore gDisplayStore; //hlavni uloziste zobrazovacich dat
 
 Display::Display()
@@ -48,16 +48,13 @@ void Display::Initialize()
         MessageBox(hWnd,"Nepovedlo se naèíst mapu","Error",0);
         exit(0);
     }
+    //Pracovni emitter, vymazat po doladeni
     gEmitterMgr.AddEmitter(-view_x,-view_y,-view_z,0,2,0,1,3,0.3f,0.5f,3,6,10000,10000,1000,10,false,EMIT_FLAG_RANDOM_ROTATE);
 }
 
 //Inicializace display listu pro aktualni mapu a umisteni
 void Display::InitModelDisplayList()
 {
-    //TODO: drawing podle dat mapy
-    //DrawModel(0,0,2,1,ANIM_WALK,true,1.0f,180.0f);
-    //DrawModel(2,0,2,2,ANIM_IDLE);
-
     //Pridani modelu hrace do display listu + ulozeni jeho pozice ve vektoru
     ModelDisplayListRecord* temp = new ModelDisplayListRecord;
     temp->ModelID = PlayerModelId;
@@ -71,7 +68,6 @@ void Display::InitModelDisplayList()
     temp->AnimProgress = gDataStore.ModelData[PlayerModelId].AnimData[ANIM_IDLE].first;
     gDisplayStore.ModelDisplayList.push_back(temp);
     PlayerModelListId = gDisplayStore.ModelDisplayList.size()-1;
-    //PlayerModelListId = gDisplayStore.ModelDisplayListSize-1;
 }
 
 //Aktualizace zobrazeni (v promenne diff ulozen cas od posledni aktualizace)
@@ -83,9 +79,6 @@ void Display::DoTick()
     //Natoceni a preklad podle aktualnich pozic
     glRotatef(h_angle,0.0f,-1.0f,0.0f);
     glTranslatef(view_x-MODPOS_X,view_y,view_z-MODPOS_Z);
-
-    //Aktualizace vyskove pozice
-    UpdateGroundPosition();
 
     //Player Model posun a rotace
     UpdatePlayerModelPosition();
@@ -205,9 +198,6 @@ ModelDisplayListRecord* Display::DrawModel(float x, float y, float z, uint32 mod
     temp->Animation = Animation;
     temp->AnimProgress = gDataStore.ModelData[modelid].AnimData[Animation].first;
     gDisplayStore.ModelDisplayList.push_back(temp);
-    //gDisplayStore.ModelDisplayList = (ModelDisplayListRecord*)realloc(gDisplayStore.ModelDisplayList,(gDisplayStore.ModelDisplayListSize+1)*sizeof(ModelDisplayListRecord));
-    //gDisplayStore.ModelDisplayList[gDisplayStore.ModelDisplayListSize] = *temp;
-    //gDisplayStore.ModelDisplayListSize += 1;
 
     return temp;
 }
@@ -219,9 +209,7 @@ void Display::DrawModels()
     uint32 AnimFirst, AnimLast;
 
     for(std::vector<ModelDisplayListRecord*>::iterator itr = gDisplayStore.ModelDisplayList.begin(); itr != gDisplayStore.ModelDisplayList.end(); ++itr)
-    //for(int i = 0; i < gDisplayStore.ModelDisplayListSize; i++)
     {
-        //temp = &gDisplayStore.ModelDisplayList[i];
         temp = *itr;
 
         if (temp->remove)
@@ -240,7 +228,6 @@ void Display::DrawModels()
         glRotatef(v_angle,1.0f, 0.0f,0.0f);
         glRotatef(h_angle,0.0f,-1.0f,0.0f);
 
-        //glTranslatef(view_x,view_y,view_z);
         glTranslatef(view_x-MODPOS_X,view_y,view_z-MODPOS_Z);
         glTranslatef(x,y,z);
 
@@ -249,7 +236,6 @@ void Display::DrawModels()
         t3DModel* pModel = &gDisplayStore.Models[temp->ModelID];
 
         //Posunout frame animace modelu pri kazdem pokusu o vykresleni
-        //TODO: animace podle diff, nejspis nutne presunout do nadrazene funkce
         if(temp->Animation != ANIM_NONE)
         {
             AnimFirst = gDataStore.ModelData[temp->ModelID].AnimData[temp->Animation].first;
@@ -367,34 +353,6 @@ void Display::FlushTextDisplayList()
 void Display::FlushModelDisplayList()
 {
     gDisplayStore.ModelDisplayList.clear();
-    //free(gDisplayStore.ModelDisplayList);
-}
-
-void Display::UpdateGroundPosition()
-{
-    // V Bombermanovi nepouzitelne
-    return;
-
-    //Ziskani a ulozeni vyskovych modifieru (pro vystup po vyskove mape)
-    float ModifierZ = CalculateFloatZCoef();
-    float ModifierX = CalculateFloatXCoef();
-    float Modifier  = 0.0f;
-
-    //Uprednostneni vetsiho modifieru
-    if(fabs(ModifierX) > fabs(ModifierZ))
-        Modifier = ModifierX;
-    else
-        Modifier = ModifierZ;
-
-    //Posun po vyskove mape
-    //Padani bude implementovano pozdeji, zatim vyvazuje rovnomerne teren
-    if( GetViewHeight()+DEFAULT_MIN_VIEW_HEIGHT+Modifier > (-view_y) )
-        gDisplay.SetViewY(-(GetViewHeight()+DEFAULT_MIN_VIEW_HEIGHT+Modifier));
-        //gDisplay.SetViewY(-GOING_UP_SPEED,true);
-
-    if( GetViewHeight()+DEFAULT_MIN_VIEW_HEIGHT+Modifier < (-view_y) )
-        gDisplay.SetViewY(-(GetViewHeight()+DEFAULT_MIN_VIEW_HEIGHT+Modifier));
-        //gDisplay.SetViewY(+GOING_DOWN_SPEED,true);
 }
 
 void Display::BindMapDefaultTexture()
@@ -406,7 +364,7 @@ void Display::BindMapDefaultTexture()
 
 void Display::DrawMap()
 {
-    //Vykresleni vyskove mapy
+    //Vykresleni mapy
     for(int i=0;i<(uint32)actmap.Width;++i)
     {
         for(int j=0;j<(uint32)actmap.Height;++j)
@@ -540,7 +498,7 @@ void DisplayStore::LoadFloorTextures()
             }
             case IMG_TYPE_JPG:
             {
-                read_JPEG_file((char*)ImageFilename,&FloorTextures[TextureID]);
+                LoadJPG((char*)ImageFilename,&FloorTextures[TextureID]);
                 gDataStore.TextureData[TextureID].loaded = true;
                 break;
             }
@@ -570,8 +528,7 @@ TextureFileType DisplayStore::GetImageFormat(char *Filename)
     return IMG_TYPE_NOT_SUPPORTED;
 }
 
-//Nacteni BMP textury pro podlahu
-//bude rozsireno o podporu JPEG a PNG formatu
+//Nacteni BMP textury
 AUX_RGBImageRec* DisplayStore::LoadBMP(char *Filename)
 {
     FILE *File = NULL;
@@ -586,6 +543,12 @@ AUX_RGBImageRec* DisplayStore::LoadBMP(char *Filename)
         return auxDIBImageLoad(Filename);
     }
     return NULL;
+}
+
+//Nacteni JPG textury
+void DisplayStore::LoadJPG(char *filename, unsigned int *textureID)
+{
+    read_JPEG_file(filename,textureID);
 }
 
 //Nacteni textur pro modely
@@ -627,7 +590,7 @@ void DisplayStore::LoadModelTextures()
             }
             case IMG_TYPE_JPG:
             {
-                read_JPEG_file((char*)ImageFilename,&ModelTextures[TextureID]);
+                LoadJPG((char*)ImageFilename,&ModelTextures[TextureID]);
                 break;
             }
             default:
@@ -770,31 +733,6 @@ unsigned short Display::CheckColision(float newx, float newy, float newz)
             }
         }
     }
-
-    // Model kolize zatim (mozna nadobro) odebrana
-    /*float minx,maxx,minz,maxz;
-
-    for(vector<ModelDisplayListRecord*>::const_iterator itr = gDisplayStore.ModelDisplayList.begin(); itr != gDisplayStore.ModelDisplayList.end(); ++itr)
-    {
-        if((*itr)->ModelID > 0 && (*itr)->collision)
-        {
-            if(t3DModel* pModel = &gDisplayStore.Models[(*itr)->ModelID])
-            {
-                minx = pModel->Minimum.x+(*itr)->x*MAP_SCALE_X;
-                maxx = pModel->Maximum.x+(*itr)->x*MAP_SCALE_X;
-                minz = pModel->Minimum.z+(*itr)->z*MAP_SCALE_Z;
-                maxz = pModel->Maximum.z+(*itr)->z*MAP_SCALE_Z;
-
-                if( fabs(newz) > fabs(minz)-COLLISION_RANGE && fabs(newz) < fabs(maxz)+COLLISION_RANGE &&
-                    (fabs(fabs(newx)-fabs(minx)) <= COLLISION_RANGE || fabs(fabs(newx)-fabs(maxx)) <= COLLISION_RANGE) )
-                    colision |= AXIS_X;
-
-                if( fabs(newx) > fabs(minx)-COLLISION_RANGE && fabs(newx) < fabs(maxx)+COLLISION_RANGE &&
-                    (fabs(fabs(newz)-fabs(minz)) <= COLLISION_RANGE || fabs(fabs(newz)-fabs(maxz)) <= COLLISION_RANGE) )
-                    colision |= AXIS_Z;
-            }
-        }
-    }*/
 
     return colision;
 }

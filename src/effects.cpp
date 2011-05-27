@@ -9,16 +9,20 @@ ParticleEmitter::ParticleEmitter()
 
 ParticleEmitter::~ParticleEmitter()
 {
-    //odstranit particles
+    //Pokud existuji nejake castice, vymazat je
+    if (!Particles.empty())
+        ClearParticles();
 }
 
 void ParticleEmitter::ClearParticles()
 {
+    //Vymazani vsech castic
     Particle* temp = NULL;
     for (std::list<Particle*>::iterator itr = Particles.begin(); itr != Particles.end();)
     {
         temp = *itr;
 
+        //Vymazat i zaznam v displaylistu
         if (temp->pRec)
             temp->pRec->remove = true;
 
@@ -47,9 +51,7 @@ bool ParticleEmitter::Update(const clock_t diff)
         {
             //vytvorit novou castici
             Particle* pNew = new Particle;
-            pNew->x = x;
-            pNew->y = y;
-            pNew->z = z;
+            //a priradit ji veskere hodnoty
             pNew->modelId = modelId;
             pNew->actTime = 0;
             pNew->destrange = frand(minrange,maxrange);
@@ -59,7 +61,10 @@ bool ParticleEmitter::Update(const clock_t diff)
             float rotate = 0.0f;
             if (flags & EMIT_FLAG_RANDOM_ROTATE)
                 rotate = frand(0,PI);
+
+            //pridat ji do display listu a ulozit pointer
             pNew->pRec = gDisplay.DrawModel(x,y,z,modelId, ANIM_IDLE,false,pNew->modelSize,rotate);
+
             Particles.push_back(pNew);
             nextParticleCountdown = density;
         } else nextParticleCountdown -= diff;
@@ -71,21 +76,26 @@ bool ParticleEmitter::Update(const clock_t diff)
     {
         temp = *itr;
 
+        //pricist cas ktery ubehl [ms]
         temp->actTime += diff;
 
         if (!temp->pRec)
             continue;
 
-        temp->pRec->x = x+(float(temp->actTime)/1000)*(float(speed)/1000)*cos(temp->hangle); //pocet tisicin rozmeru za 1 sekundu
+        //speed [pocet tisicin rozmeru za 1 sekundu]
+        temp->pRec->x = x+(float(temp->actTime)/1000)*(float(speed)/1000)*cos(temp->hangle);
         temp->pRec->y = y+(float(temp->actTime)/1000)*(float(speed)/1000)*sin(temp->vangle);
         temp->pRec->z = z+(float(temp->actTime)/1000)*(float(speed)/1000)*sin(temp->hangle);
 
+        //pokud castice urazila drahu jakou ma urazit, vymazeme ji
         if (pythagoras_c(pythagoras_c(temp->pRec->x,temp->pRec->z),temp->pRec->y) > temp->destrange)
         {
             temp->pRec->remove = true;
             itr = Particles.erase(itr);
             if (itr == Particles.end())
                 break;
+            if (itr != Particles.begin())
+                --itr;
             continue;
         }
     }
@@ -110,6 +120,7 @@ void EmitterMgr::AddEmitter(float x, float y, float z,
                     unsigned int time, unsigned int speed, unsigned int velocity, unsigned int density,
                     bool gravity, unsigned int flags)
 {
+    //Vytvori novy emitter, priradi mu dane hodnoty a prida ho do listu emitteru
     ParticleEmitter* pTemp = new ParticleEmitter();
     pTemp->angleh = angleh;
     pTemp->anglev = anglev;
@@ -145,15 +156,19 @@ void EmitterMgr::Update(const clock_t diff)
     if(Emitters.empty())
         return;
 
+    //Projde vsechny emittery, zavola jejich update funkci, a pokud vrati false, vymazat z listu emitteru
     for(list<ParticleEmitter*>::const_iterator itr = Emitters.begin(); itr != Emitters.end(); ++itr)
     {
         if(!(*itr)->Update(diff))
         {
+            //Nejdrive vymazat vsechny castice
             (*itr)->ClearParticles();
+            //A az pak vymazat emitter z listu
             itr = Emitters.erase(itr);
             if (itr == Emitters.end())
                 break;
-            --itr;
+            if (itr != Emitters.begin())
+                --itr;
             continue;
         }
     }

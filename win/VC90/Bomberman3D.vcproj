@@ -217,6 +217,10 @@
 				RelativePath="..\..\src\uihandlers.cpp"
 				>
 			</File>
+			<File
+				RelativePath="..\..\src\util.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="include"
@@ -263,6 +267,10 @@
 			</File>
 			<File
 				RelativePath="..\..\include\timer.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\util.h"
 				>
 			</File>
 		</Filter>

@@ -3,16 +3,9 @@
 
 #include "game_inc.h"
 
-static float frand() { return rand() / (float) RAND_MAX; }
-static float frand(float f) { return frand() * f; }
-static float frand(float f, float g) { return frand(g - f) + f; }
-static float pythagoras_c(float a, float b) { return sqrt(a*a+b*b); }
-
 struct Particle
 {
-    //Pozice jedne castice
-    float x,y,z;
-    //Jeji model
+    //Model castice
     unsigned int modelId;
     float modelSize;
     //A doba pusobeni na svete
@@ -23,6 +16,7 @@ struct Particle
     float hangle;
     float vangle;
 
+    //Zaznam v display listu (souradnice, pohyb)
     ModelDisplayListRecord* pRec;
 };
 
@@ -75,12 +69,14 @@ public:
     EmitterMgr();
     ~EmitterMgr();
 
+    //Prida emitter se zadanymi parametry
     void AddEmitter(float x, float y, float z,
                     float dirangleh, float diranglev, float angleh, float anglev,
                     unsigned int modelId, float modelSize, float sizevar,
                     float minrange, float maxrange,
                     unsigned int time, unsigned int speed, unsigned int velocity, unsigned int density,
                     bool gravity, unsigned int flags);
+    //Prida emitter predpripraveny uzivatelem
     void AddEmitter(ParticleEmitter* pEmitter);
 
     void Update(const clock_t diff);

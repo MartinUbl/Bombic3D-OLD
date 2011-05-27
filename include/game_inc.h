@@ -65,6 +65,7 @@ using namespace std;
 #include "datastore.h"
 #include "effects.h"
 #include "timer.h"
+#include "util.h"
 #include <shared.h>
 
 extern HWND hWnd;
