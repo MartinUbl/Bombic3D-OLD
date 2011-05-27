@@ -48,6 +48,7 @@ void Display::Initialize()
         MessageBox(hWnd,"Nepovedlo se naèíst mapu","Error",0);
         exit(0);
     }
+    gEmitterMgr.AddEmitter(-view_x,-view_y,-view_z,0,2,0,1,3,0.3f,0.5f,3,6,10000,10000,1000,10,false,EMIT_FLAG_RANDOM_ROTATE);
 }
 
 //Inicializace display listu pro aktualni mapu a umisteni
@@ -222,6 +223,13 @@ void Display::DrawModels()
     {
         //temp = &gDisplayStore.ModelDisplayList[i];
         temp = *itr;
+
+        if (temp->remove)
+        {
+            itr = gDisplayStore.ModelDisplayList.erase(itr);
+            if (itr == gDisplayStore.ModelDisplayList.end())
+                break;
+        }
 
         x = temp->x*MAP_SCALE_X;
         y = temp->y*MAP_SCALE_Y;

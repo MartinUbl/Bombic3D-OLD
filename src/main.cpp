@@ -264,6 +264,7 @@ int DrawGLScene(GLvoid)
     gDisplay.SetDiff(diff);
     gDisplay.DoTick();
     gTimer.Update(diff);
+    gEmitterMgr.Update(diff);
 
     return TRUE;
 }
@@ -577,6 +578,8 @@ int WINAPI WinMain(    HINSTANCE    hInstance,
     BOOL done = FALSE;
 
     LoadConfig();
+
+    srand ( (unsigned int)time(NULL) );
 
     if(!CreateGLWindow("Bomberman 3D",gConfig.WindowWidth,gConfig.WindowHeight,gConfig.ColorDepth,gConfig.fullscreen))
     {

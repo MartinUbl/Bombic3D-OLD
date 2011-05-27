@@ -172,6 +172,7 @@ struct TextDisplayListRecord
 //struktura zaznamu display listu modelu
 struct ModelDisplayListRecord
 {
+    ModelDisplayListRecord() { remove = false; }
     GLfloat x,y,z;
     uint32 ModelID;
     AnimType Animation;
@@ -179,6 +180,8 @@ struct ModelDisplayListRecord
 
     bool collision;
     float scale, rotate;
+
+    bool remove;
 };
 
 //Trida uloziste zobrazovacich dat
