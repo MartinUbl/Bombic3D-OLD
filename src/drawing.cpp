@@ -68,6 +68,7 @@ void Display::InitModelDisplayList()
     temp->rotate = 0.0f;
     temp->Animation = ANIM_IDLE;
     temp->AnimProgress = gDataStore.ModelData[PlayerModelId].AnimData[ANIM_IDLE].first;
+    temp->id = gDisplayStore.GetFreeID(TYPE_MODEL);
     gDisplayStore.ModelDisplayList.push_back(temp);
     PlayerModelListId = gDisplayStore.ModelDisplayList.size()-1;
 }
@@ -189,6 +190,80 @@ void Display::SetPlayerAnim(AnimType Animation)
     gDisplayStore.ModelDisplayList[PlayerModelListId]->Animation = Animation;
 }
 
+uint32 DisplayStore::GetFreeID(DisplayListTypes type)
+{
+    if (type == TYPE_MODEL)
+    {
+        // Vytvori si list IDcek, ktere uz jsou prirazeny
+        std::list<uint32> UsedIDs;
+        UsedIDs.clear();
+        for (std::vector<ModelDisplayListRecord*>::const_iterator itr = ModelDisplayList.begin(); itr != ModelDisplayList.end(); ++itr)
+            UsedIDs.push_back((*itr)->id);
+
+        // Pote projde vsechna cisla od 1 do 0xFFFFFF, a pokud se dane ID nenachazi v listu ke zobrazeni,
+        // vrati ho jako vysledek
+        bool cont = false;
+        for (int i = 1; i < 0x00FFFFFF; i++)
+        {
+            for (std::list<uint32>::const_iterator itr = UsedIDs.begin(); itr != UsedIDs.end(); ++itr)
+                if ((*itr) == MAKEID(i,type))
+                {
+                    cont = true;
+                    break;
+                }
+            if (cont)
+            {
+                cont = false;
+                continue;
+            }
+            return MAKEID(i,type);
+        }
+    }
+    else if (type == TYPE_BILLBOARD)
+    {
+        // Vytvori si list IDcek, ktere uz jsou prirazeny
+        std::list<uint32> UsedIDs;
+        UsedIDs.clear();
+        for (std::vector<BillboardDisplayListRecord*>::const_iterator itr = BillboardDisplayList.begin(); itr != BillboardDisplayList.end(); ++itr)
+            UsedIDs.push_back((*itr)->id);
+
+        // Pote projde vsechna cisla od 1 do 0xFFFFFF, a pokud se dane ID nenachazi v listu ke zobrazeni,
+        // vrati ho jako vysledek
+        for (int i = 1; i < 0x00FFFFFF; i++)
+        {
+            for (std::list<uint32>::const_iterator itr = UsedIDs.begin(); itr != UsedIDs.end(); ++itr)
+                if ((*itr) == MAKEID(i,type))
+                    continue;
+            return MAKEID(i,type);
+        }
+    }
+    return 0;
+}
+
+//Odebrani displaylist recordu podle id
+//typ je rozpoznan z prvniho bytu id
+void DisplayStore::RemoveDisplayRecord(uint32 id)
+{
+    if (IDTYPE(id) == TYPE_MODEL)
+    {
+        for (std::vector<ModelDisplayListRecord*>::const_iterator itr = ModelDisplayList.begin(); itr != ModelDisplayList.end(); ++itr)
+            if ((*itr)->id == id)
+            {
+                ModelDisplayList.erase(itr);
+                break;
+            }
+    }
+    else if (IDTYPE(id) == TYPE_BILLBOARD)
+    {
+        for (std::vector<BillboardDisplayListRecord*>::const_iterator itr = BillboardDisplayList.begin(); itr != BillboardDisplayList.end(); ++itr)
+            if ((*itr)->id == id)
+            {
+                BillboardDisplayList.erase(itr);
+                break;
+            }
+    }
+}
+
 //Vykresli model modelid na souradnice x,y,z
 ModelDisplayListRecord* Display::DrawModel(float x, float y, float z, uint32 modelid, AnimType Animation, bool collision, float scale, float rotate)
 {
@@ -202,6 +277,7 @@ ModelDisplayListRecord* Display::DrawModel(float x, float y, float z, uint32 mod
     temp->collision = collision;
     temp->Animation = Animation;
     temp->AnimProgress = gDataStore.ModelData[modelid].AnimData[Animation].first;
+    temp->id = gDisplayStore.GetFreeID(TYPE_MODEL);
     gDisplayStore.ModelDisplayList.push_back(temp);
 
     return temp;
@@ -431,16 +507,6 @@ void Display::DrawMap()
             }
         }
     }
-    // Billboarding test
-    /*glTranslatef(2,0,2);
-    glRotatef(90.0f+h_angle,0.0f,1.0f,0.0f);
-    glBegin(GL_QUADS);
-        glTexCoord2f(1.0f, 1.0f); glVertex3f(0*MAP_SCALE_X, 8*MAP_SCALE_Y, -1*MAP_SCALE_Z);
-        glTexCoord2f(1.0f, 0.0f); glVertex3f(0*MAP_SCALE_X, 4*MAP_SCALE_Y, -1*MAP_SCALE_Z);
-        glTexCoord2f(0.0f, 0.0f); glVertex3f(0*MAP_SCALE_X, 4*MAP_SCALE_Y, 1*MAP_SCALE_Z);
-        glTexCoord2f(0.0f, 1.0f); glVertex3f(0*MAP_SCALE_X, 8*MAP_SCALE_Y, 1*MAP_SCALE_Z);
-    glEnd();
-    glTranslatef(view_x-MODPOS_X,view_y,view_z-MODPOS_Z);*/
 }
 
 //Vykresleni vsech billboardu
@@ -487,6 +553,7 @@ BillboardDisplayListRecord* Display::DrawBillboard(float x, float y, float z, ui
     pTemp->TextureID = TextureID;
     pTemp->width = width;
     pTemp->height = height;
+    pTemp->id = gDisplayStore.GetFreeID(TYPE_BILLBOARD);
 
     gDisplayStore.BillboardDisplayList.push_back(pTemp);
     return pTemp;

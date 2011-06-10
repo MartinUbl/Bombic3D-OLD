@@ -15,6 +15,7 @@ GamePlay::~GamePlay()
 
 //param1 = ContentPosX
 //param2 = ContentPosZ
+//param3 = displaylist id
 void Boom(uint32 param1, uint32 param2, uint32 param3)
 {
     float pos_x, pos_z;
@@ -29,6 +30,8 @@ void Boom(uint32 param1, uint32 param2, uint32 param3)
     gEmitterMgr.AddEmitter(pos_x,2.0f,pos_z,PI,0,0,0,-0.25f,-0.25f,0.25f,0.25f,3,0.3f,0.5f,3,6,1000,8000,2000,1,false,EMIT_FLAG_RANDOM_ROTATE);
     //dopredu
     gEmitterMgr.AddEmitter(pos_x,2.0f,pos_z,3*PI/2,0,0,0,-0.25f,-0.25f,0.25f,0.25f,3,0.3f,0.5f,3,6,1000,8000,2000,1,false,EMIT_FLAG_RANDOM_ROTATE);
+
+    gDisplayStore.RemoveDisplayRecord(param3);
 }
 
 void GamePlay::PlantBomb()
@@ -39,5 +42,5 @@ void GamePlay::PlantBomb()
     float conz = 0.5f+(ContentPosZ-1);
 
     ModelDisplayListRecord* temp = gDisplay.DrawModel(conx,0,conz,2,ANIM_IDLE,false,1);
-    gTimer.AddTimedEvent(2000, &Boom, (uint32)ContentPosX, (uint32)ContentPosZ, 0);
+    gTimer.AddTimedEvent(2000, &Boom, (uint32)ContentPosX, (uint32)ContentPosZ, temp->id);
 }

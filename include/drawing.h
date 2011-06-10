@@ -172,6 +172,17 @@ struct TextDisplayListRecord
     std::string what;
 };
 
+enum DisplayListTypes
+{
+    TYPE_MODEL = 1,
+    TYPE_BILLBOARD = 2,
+};
+
+#define IDTYPE(a) (a & 0x000000FF)
+#define REALID(a) ((a & 0xFFFFFF00) >> 8)
+
+#define MAKEID(a,b) ((a << 8) | uint8(b))
+
 //struktura zaznamu display listu modelu
 struct ModelDisplayListRecord
 {
@@ -183,6 +194,8 @@ struct ModelDisplayListRecord
 
     bool collision;
     float scale, rotate;
+
+    uint32 id;
 
     bool remove;
 };
@@ -196,6 +209,8 @@ struct BillboardDisplayListRecord
     uint32 TextureID;
     //+animace?
 
+    uint32 id;
+
     bool remove;
 };
 
@@ -208,8 +223,6 @@ public:
         NeededFloorTextures.clear();
         FloorTextures.clear();
         TextDisplayList.clear();
-        //ModelDisplayList = (ModelDisplayListRecord*)malloc(sizeof(ModelDisplayListRecord));
-        //ModelDisplayListSize = 0;
         ModelDisplayList.clear();
     };
     ~DisplayStore() {};
@@ -226,6 +239,11 @@ public:
     void LoadModels();
     //Nacitani textur modelu
     void LoadModelTextures();
+
+    //Ziska nejmensi volne ID pro dany typ objektu
+    uint32 GetFreeID(DisplayListTypes type);
+    //Vymaze objekt podle ID (sam rozpozna podle prvniho bajtu o jaky objekt jde)
+    void RemoveDisplayRecord(uint32 id);
 
     //Pomocna fce pro zjisteni, zdali se textura uz nachazi v seznamu potrebnych
     bool IsAlreadyNeededTexture(uint32 TextureID);
