@@ -44,30 +44,47 @@ bool ParticleEmitter::Update(const clock_t diff)
     //TODO: dodelat "dojizdeni" emitteru - cas po ktery uz nebudou vydavany castice, ale
     //stare castice se budou stale pohybovat, az zmizi. Po tu dobu vracet stale true!
 
+    uint32 newparticlescount = 10;
+
     //Zde update vsech castic a emit novych
-    if (Particles.size() < velocity-1)
+    while(newparticlescount > 0)
     {
-        if (nextParticleCountdown < diff)
+        if (Particles.size() < velocity-1)
         {
-            //vytvorit novou castici
-            Particle* pNew = new Particle;
-            //a priradit ji veskere hodnoty
-            pNew->modelId = modelId;
-            pNew->actTime = 0;
-            pNew->destrange = frand(minrange,maxrange);
-            pNew->hangle = frand(dirangleh-angleh/2,dirangleh+angleh/2);
-            pNew->vangle = frand(diranglev-anglev/2,diranglev+anglev/2);
-            pNew->modelSize = modelSize+frand(min(0,sizevar),max(0,sizevar));
-            float rotate = 0.0f;
-            if (flags & EMIT_FLAG_RANDOM_ROTATE)
-                rotate = frand(0,PI);
+            if (nextParticleCountdown < diff)
+            {
+                //vytvorit novou castici
+                Particle* pNew = new Particle;
+                //a priradit ji veskere hodnoty
 
-            //pridat ji do display listu a ulozit pointer
-            pNew->pRec = gDisplay.DrawModel(x,y,z,modelId, ANIM_IDLE,false,pNew->modelSize,rotate);
+                //velice neuniverzalni a ne prilis profesionalni postup zde
+                pNew->sx = x;
+                pNew->sz = z;
+                if (dirangleh < PI/4 || dirangleh > 7*PI/4 || (dirangleh > 3*PI/4 && dirangleh < 5*PI/4) )
+                    pNew->sz = z+frand(square1,square3);
+                else
+                    pNew->sx = x+frand(square1,square3);
+                pNew->sy = y+frand(square2,square4);
+                //az sem
 
-            Particles.push_back(pNew);
-            nextParticleCountdown = density;
-        } else nextParticleCountdown -= diff;
+                pNew->modelId = modelId;
+                pNew->actTime = 0;
+                pNew->destrange = frand(minrange,maxrange);
+                pNew->hangle = frand(dirangleh-angleh/2,dirangleh+angleh/2);
+                pNew->vangle = frand(diranglev-anglev/2,diranglev+anglev/2);
+                pNew->modelSize = modelSize+frand(min(0,sizevar),max(0,sizevar));
+                float rotate = 0.0f;
+                if (flags & EMIT_FLAG_RANDOM_ROTATE)
+                    rotate = frand(0,PI);
+
+                //pridat ji do display listu a ulozit pointer
+                pNew->pRec = gDisplay.DrawModel(x,y,z,modelId, ANIM_IDLE,false,pNew->modelSize,rotate);
+
+                Particles.push_back(pNew);
+                nextParticleCountdown = density;
+            } else nextParticleCountdown -= diff;
+        }
+        --newparticlescount;
     }
 
     Particle* temp;
@@ -83,9 +100,9 @@ bool ParticleEmitter::Update(const clock_t diff)
             continue;
 
         //speed [pocet tisicin rozmeru za 1 sekundu]
-        temp->pRec->x = x+(float(temp->actTime)/1000)*(float(speed)/1000)*cos(temp->hangle);
-        temp->pRec->y = y+(float(temp->actTime)/1000)*(float(speed)/1000)*sin(temp->vangle);
-        temp->pRec->z = z+(float(temp->actTime)/1000)*(float(speed)/1000)*sin(temp->hangle);
+        temp->pRec->x = temp->sx+(float(temp->actTime)/1000)*(float(speed)/1000)*cos(temp->hangle);
+        temp->pRec->y = temp->sy+(float(temp->actTime)/1000)*(float(speed)/1000)*sin(temp->vangle);
+        temp->pRec->z = temp->sz+(float(temp->actTime)/1000)*(float(speed)/1000)*sin(temp->hangle);
 
         //pokud castice urazila drahu jakou ma urazit, vymazeme ji
         if (pythagoras_c(pythagoras_c(temp->pRec->x,temp->pRec->z),temp->pRec->y) > temp->destrange)
@@ -115,6 +132,7 @@ EmitterMgr::~EmitterMgr()
 
 void EmitterMgr::AddEmitter(float x, float y, float z,
                     float dirangleh, float diranglev, float angleh, float anglev,
+                    float square1, float square2, float square3, float square4,
                     unsigned int modelId, float modelSize, float sizevar,
                     float minrange, float maxrange,
                     unsigned int time, unsigned int speed, unsigned int velocity, unsigned int density,
@@ -126,6 +144,10 @@ void EmitterMgr::AddEmitter(float x, float y, float z,
     pTemp->anglev = anglev;
     pTemp->dirangleh = dirangleh;
     pTemp->diranglev = diranglev;
+    pTemp->square1 = square1;
+    pTemp->square2 = square2;
+    pTemp->square3 = square3;
+    pTemp->square4 = square4;
     pTemp->gravity = gravity;
     pTemp->maxrange = maxrange;
     pTemp->minrange = minrange;

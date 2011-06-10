@@ -7,7 +7,7 @@ void Timer::Initialize()
     TimedEvents.clear();
 }
 
-void Timer::AddTimedEvent(uint32 time, void (*Handler)(uint32, uint32), uint32 param1, uint32 param2)
+void Timer::AddTimedEvent(uint32 time, void (*Handler)(uint32, uint32, uint32), uint32 param1, uint32 param2, uint32 param3)
 {
     TimerRecord temp;
     temp.Handler = Handler;
@@ -15,6 +15,7 @@ void Timer::AddTimedEvent(uint32 time, void (*Handler)(uint32, uint32), uint32 p
     temp.remaintime = time;
     temp.param1 = param1;
     temp.param2 = param2;
+    temp.param3 = param3;
     TimedEvents.push_back(temp);
 }
 
@@ -23,21 +24,19 @@ void Timer::Update(clock_t diff)
     if (TimedEvents.empty())
         return;
 
-    //std::list<TimerRecord*> RemoveList;
-    //RemoveList.clear();
-
-    for (std::list<TimerRecord>::iterator itr = TimedEvents.begin(); itr != TimedEvents.end(); ++itr)
+    for (std::list<TimerRecord>::iterator itr = TimedEvents.begin(); itr != TimedEvents.end();)
     {
         if (itr->remaintime <= diff)
         {
-            itr->Handler(itr->param1, itr->param2);
-            //RemoveList.push_back((itr));
-            itr->remaintime = itr->maxtime;
-        } else itr->remaintime -= diff;
+            itr->Handler(itr->param1, itr->param2, itr->param3);
+            itr = TimedEvents.erase(itr);
+        }
+        else
+        {
+            itr->remaintime -= diff;
+            ++itr;
+        }
     }
-
-    //for (std::list<TimerRecord>::iterator itr = RemoveList.begin(); itr != RemoveList.end(); ++itr)
-    //    TimedEvents.remove((*itr));
 }
 
 

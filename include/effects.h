@@ -5,6 +5,8 @@
 
 struct Particle
 {
+    //Startovni pozice
+    float sx,sy,sz;
     //Model castice
     unsigned int modelId;
     float modelSize;
@@ -52,6 +54,8 @@ public:
     bool gravity;
     //A nejakou promennou pro flagy
     unsigned int flags;
+    //ctverec emittu
+    float square1, square2, square3, square4;
 
     //Pohyblive promenne
     //celkovy ubehly cas (milisekundy, nejspis)
@@ -72,6 +76,7 @@ public:
     //Prida emitter se zadanymi parametry
     void AddEmitter(float x, float y, float z,
                     float dirangleh, float diranglev, float angleh, float anglev,
+                    float square1, float square2, float square3, float square4,
                     unsigned int modelId, float modelSize, float sizevar,
                     float minrange, float maxrange,
                     unsigned int time, unsigned int speed, unsigned int velocity, unsigned int density,

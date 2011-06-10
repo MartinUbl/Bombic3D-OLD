@@ -32,6 +32,7 @@
 
 //Reference
 struct ModelDisplayListRecord;
+struct BillboardDisplayListRecord;
 
 //pomocny enum pro pozice na vyskove mape
 enum Vertices
@@ -125,7 +126,10 @@ public:
     void FlushTextDisplayList();
     //Vykresleni modelu
     ModelDisplayListRecord* DrawModel(float x, float y, float z, uint32 modelid, AnimType Animation = ANIM_IDLE, bool collision = true, float scale = 1.0f, float rotate = 0.0f);
+    //Vykresleni billboardu
+    BillboardDisplayListRecord* DrawBillboard(float x, float y, float z, uint32 TextureID, float width, float height);
     void DrawModels();
+    void DrawBillboards();
     void InitModelDisplayList();
     void FlushModelDisplayList();
     void AnimateModelObject(t3DObject *pObject, ModelDisplayListRecord* pData);
@@ -179,6 +183,18 @@ struct ModelDisplayListRecord
 
     bool collision;
     float scale, rotate;
+
+    bool remove;
+};
+
+//struktura zaznamu display listu billboardu
+struct BillboardDisplayListRecord
+{
+    BillboardDisplayListRecord() { remove = false; }
+    GLfloat x,y,z;
+    GLfloat width,height;
+    uint32 TextureID;
+    //+animace?
 
     bool remove;
 };
@@ -240,8 +256,8 @@ public:
     std::vector<TextDisplayListRecord*> TextDisplayList;
     //Display list pro modely
     std::vector<ModelDisplayListRecord*> ModelDisplayList;
-    //ModelDisplayListRecord* ModelDisplayList;
-    //uint32 ModelDisplayListSize;
+    //Display list pro billboardy
+    std::vector<BillboardDisplayListRecord*> BillboardDisplayList;
 
     t3DSLoader ModelLoader;
 };

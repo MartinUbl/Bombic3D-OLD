@@ -49,7 +49,9 @@ void Display::Initialize()
         exit(0);
     }
     //Pracovni emitter, vymazat po doladeni
-    gEmitterMgr.AddEmitter(-view_x,-view_y,-view_z,0,2,0,1,3,0.3f,0.5f,3,6,10000,10000,1000,10,false,EMIT_FLAG_RANDOM_ROTATE);
+    //gEmitterMgr.AddEmitter(-view_x,-view_y,-view_z,0,2,0,1,3,0.3f,0.5f,3,6,10000,10000,1000,10,false,EMIT_FLAG_RANDOM_ROTATE);
+    //Pracovni billboard
+    //DrawBillboard(2,4,2,1,1,3);
 }
 
 //Inicializace display listu pro aktualni mapu a umisteni
@@ -94,12 +96,15 @@ void Display::DoTick()
     //Nabindovat defaultni texturu
     BindMapDefaultTexture();
 
+    //Vykresleni billboardu
+    DrawBillboards();
+
     //Vykresleni mapy
     DrawMap();
 
     uint32 pdiff = (uint32)m_diff & 0xFFFF;
     //Vykresleni fontu (pozdeji taky bude nutne nahradit, po zpojizdneni font display listu)
-    this->DrawText(-0.052f,-0.037f, "X: %f, Y: %f, Z: %f, diff: %u", view_x, view_y, view_z,pdiff);
+    this->DrawText(-0.052f,-0.037f, "X: %f, Y: %f, Z: %f, [%u,%u]", view_x, view_y, view_z,int(fabs((view_x)/MAP_SCALE_X))+1,int(fabs((view_z)/MAP_SCALE_Z))+1);
 
     //Vykresleni uzivatelskeho rozhrani
     //gInterface.Draw();
@@ -426,6 +431,65 @@ void Display::DrawMap()
             }
         }
     }
+    // Billboarding test
+    /*glTranslatef(2,0,2);
+    glRotatef(90.0f+h_angle,0.0f,1.0f,0.0f);
+    glBegin(GL_QUADS);
+        glTexCoord2f(1.0f, 1.0f); glVertex3f(0*MAP_SCALE_X, 8*MAP_SCALE_Y, -1*MAP_SCALE_Z);
+        glTexCoord2f(1.0f, 0.0f); glVertex3f(0*MAP_SCALE_X, 4*MAP_SCALE_Y, -1*MAP_SCALE_Z);
+        glTexCoord2f(0.0f, 0.0f); glVertex3f(0*MAP_SCALE_X, 4*MAP_SCALE_Y, 1*MAP_SCALE_Z);
+        glTexCoord2f(0.0f, 1.0f); glVertex3f(0*MAP_SCALE_X, 8*MAP_SCALE_Y, 1*MAP_SCALE_Z);
+    glEnd();
+    glTranslatef(view_x-MODPOS_X,view_y,view_z-MODPOS_Z);*/
+}
+
+//Vykresleni vsech billboardu
+void Display::DrawBillboards()
+{
+    BillboardDisplayListRecord* temp = NULL;
+
+    for (std::vector<BillboardDisplayListRecord*>::iterator itr = gDisplayStore.BillboardDisplayList.begin(); itr != gDisplayStore.BillboardDisplayList.end(); ++itr)
+    {
+        temp = (*itr);
+
+        if (temp->remove)
+        {
+            itr = gDisplayStore.BillboardDisplayList.erase(itr);
+            if (itr == gDisplayStore.BillboardDisplayList.end())
+                break;
+        }
+
+        //glLoadIdentity();
+        glTranslatef(temp->x*MAP_SCALE_X,temp->y*MAP_SCALE_Y,temp->z*MAP_SCALE_Z);
+        glRotatef(90.0f+h_angle,0.0f,1.0f,0.0f);
+        glBegin(GL_QUADS);
+            glTexCoord2f(1.0f, 1.0f); glVertex3f(0*MAP_SCALE_X, temp->height*MAP_SCALE_Y, (-temp->width/2)*MAP_SCALE_Z);
+            glTexCoord2f(1.0f, 0.0f); glVertex3f(0*MAP_SCALE_X, 0*MAP_SCALE_Y, (-temp->width/2)*MAP_SCALE_Z);
+            glTexCoord2f(0.0f, 0.0f); glVertex3f(0*MAP_SCALE_X, 0*MAP_SCALE_Y, ( temp->width/2)*MAP_SCALE_Z);
+            glTexCoord2f(0.0f, 1.0f); glVertex3f(0*MAP_SCALE_X, temp->height*MAP_SCALE_Y, ( temp->width/2)*MAP_SCALE_Z);
+        glEnd();
+    }
+    glLoadIdentity();
+
+    glRotatef(v_angle,1.0f,0.0f,0.0f);
+    glRotatef(h_angle,0.0f,-1.0f,0.0f);
+    glTranslatef(view_x-MODPOS_X,view_y,view_z-MODPOS_Z);
+}
+
+//Pridani billboardu do listu k vykresleni
+BillboardDisplayListRecord* Display::DrawBillboard(float x, float y, float z, uint32 TextureID, float width, float height)
+{
+    BillboardDisplayListRecord* pTemp = new BillboardDisplayListRecord;
+
+    pTemp->x = x;
+    pTemp->y = y;
+    pTemp->z = z;
+    pTemp->TextureID = TextureID;
+    pTemp->width = width;
+    pTemp->height = height;
+
+    gDisplayStore.BillboardDisplayList.push_back(pTemp);
+    return pTemp;
 }
 
 //Zaridi animaci objektu daneho modelu tak, aby se nastavil do polohy podle aktualniho framu
