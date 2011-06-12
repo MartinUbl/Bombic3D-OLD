@@ -32,6 +32,7 @@ void Display::Initialize()
     if(LoadMap(target_hmap,target_tmap))
     {
         actmap.MapId = 1; //TODO: priradit mapam ID
+        gDisplayStore.FillCustomNeededData();
         gDisplayStore.LoadFloorTextures();
         gDisplayStore.LoadModels();
         gDisplayStore.LoadModelTextures();
@@ -51,7 +52,12 @@ void Display::Initialize()
     //Pracovni emitter, vymazat po doladeni
     //gEmitterMgr.AddEmitter(-view_x,-view_y,-view_z,0,2,0,1,3,0.3f,0.5f,3,6,10000,10000,1000,10,false,EMIT_FLAG_RANDOM_ROTATE);
     //Pracovni billboard
-    //DrawBillboard(2,4,2,1,1,3);
+    DrawBillboard(2,4,2,3,1,3,true);
+}
+
+void DisplayStore::FillCustomNeededData()
+{
+    NeededFloorTextures.push_back(3);
 }
 
 //Inicializace display listu pro aktualni mapu a umisteni
@@ -97,11 +103,11 @@ void Display::DoTick()
     //Nabindovat defaultni texturu
     BindMapDefaultTexture();
 
-    //Vykresleni billboardu
-    DrawBillboards();
-
     //Vykresleni mapy
     DrawMap();
+
+    //Vykresleni billboardu
+    DrawBillboards();
 
     uint32 pdiff = (uint32)m_diff & 0xFFFF;
     //Vykresleni fontu (pozdeji taky bude nutne nahradit, po zpojizdneni font display listu)
@@ -525,15 +531,32 @@ void Display::DrawBillboards()
                 break;
         }
 
-        //glLoadIdentity();
+        glBindTexture(GL_TEXTURE_2D, gDisplayStore.FloorTextures[temp->TextureID]);
+
+        // TODO: vykreslit pruhledny objekty az na konci
+        // TODO2: vykreslit pruhledny objekty dvakrat, aby se zarucila viditelnost pruhlednych objektu
+        //        za pruhlednymi objekty
+
+        // Pruhledne objekty potrebuji mit zapnuty mod pro blending a mod one minus src alpha pro
+        // spravne vykresleni pruhlednosti
+        if (temp->blend)
+        {
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+            glColor4f(1,1,1,0.85);
+        }
         glTranslatef(temp->x*MAP_SCALE_X,temp->y*MAP_SCALE_Y,temp->z*MAP_SCALE_Z);
         glRotatef(90.0f+h_angle,0.0f,1.0f,0.0f);
+
         glBegin(GL_QUADS);
             glTexCoord2f(1.0f, 1.0f); glVertex3f(0*MAP_SCALE_X, temp->height*MAP_SCALE_Y, (-temp->width/2)*MAP_SCALE_Z);
             glTexCoord2f(1.0f, 0.0f); glVertex3f(0*MAP_SCALE_X, 0*MAP_SCALE_Y, (-temp->width/2)*MAP_SCALE_Z);
             glTexCoord2f(0.0f, 0.0f); glVertex3f(0*MAP_SCALE_X, 0*MAP_SCALE_Y, ( temp->width/2)*MAP_SCALE_Z);
             glTexCoord2f(0.0f, 1.0f); glVertex3f(0*MAP_SCALE_X, temp->height*MAP_SCALE_Y, ( temp->width/2)*MAP_SCALE_Z);
         glEnd();
+        // Nezapomeneme vypnout blending, jen jako slusnacci
+        if (temp->blend)
+            glDisable(GL_BLEND);
     }
     glLoadIdentity();
 
@@ -543,7 +566,7 @@ void Display::DrawBillboards()
 }
 
 //Pridani billboardu do listu k vykresleni
-BillboardDisplayListRecord* Display::DrawBillboard(float x, float y, float z, uint32 TextureID, float width, float height)
+BillboardDisplayListRecord* Display::DrawBillboard(float x, float y, float z, uint32 TextureID, float width, float height, bool blend)
 {
     BillboardDisplayListRecord* pTemp = new BillboardDisplayListRecord;
 
@@ -554,6 +577,7 @@ BillboardDisplayListRecord* Display::DrawBillboard(float x, float y, float z, ui
     pTemp->width = width;
     pTemp->height = height;
     pTemp->id = gDisplayStore.GetFreeID(TYPE_BILLBOARD);
+    pTemp->blend = blend;
 
     gDisplayStore.BillboardDisplayList.push_back(pTemp);
     return pTemp;
@@ -633,6 +657,12 @@ void DisplayStore::LoadFloorTextures()
                 gDataStore.TextureData[TextureID].loaded = true;
                 break;
             }
+            case IMG_TYPE_PNG:
+            {
+                LoadPNG((char*)ImageFilename,&FloorTextures[TextureID]);
+                gDataStore.TextureData[TextureID].loaded = true;
+                break;
+            }
             default:
                 break;
         }
@@ -655,6 +685,8 @@ TextureFileType DisplayStore::GetImageFormat(char *Filename)
             return IMG_TYPE_JPG;
         if(extension == "BMP")
             return IMG_TYPE_BMP;
+        if(extension == "PNG")
+            return IMG_TYPE_PNG;
     }
     return IMG_TYPE_NOT_SUPPORTED;
 }
@@ -680,6 +712,34 @@ AUX_RGBImageRec* DisplayStore::LoadBMP(char *Filename)
 void DisplayStore::LoadJPG(char *filename, unsigned int *textureID)
 {
     read_JPEG_file(filename,textureID);
+}
+
+//Nacteni PNG textury
+void DisplayStore::LoadPNG(char *filename, unsigned int *textureID)
+{
+    int width = 0, height = 0, channels = 0;
+    GLubyte * imgArray;
+    imgArray = SOIL_load_image (
+        filename,
+        &width, &height, &channels,
+        SOIL_LOAD_AUTO
+        );
+
+    glGenTextures(1, textureID);
+    glBindTexture(GL_TEXTURE_2D, *textureID);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    if(channels == 4)
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, imgArray);
+    }
+    else
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, imgArray);
+
+    SOIL_free_image_data( imgArray );
+
+    //unsigned int text_id_value = SOIL_load_OGL_texture(filename,SOIL_LOAD_AUTO,SOIL_CREATE_NEW_ID,0);
+    //textureID = &text_id_value;
 }
 
 //Nacteni textur pro modely
@@ -722,6 +782,11 @@ void DisplayStore::LoadModelTextures()
             case IMG_TYPE_JPG:
             {
                 LoadJPG((char*)ImageFilename,&ModelTextures[TextureID]);
+                break;
+            }
+            case IMG_TYPE_PNG:
+            {
+                LoadPNG((char*)ImageFilename,&ModelTextures[TextureID]);
                 break;
             }
             default:

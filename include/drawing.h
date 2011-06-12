@@ -5,6 +5,8 @@
 
 #include <game_inc.h>
 #include <time.h>
+#include <SOIL.h> // Simple OpenGL Image Library hlavickovy soubor
+#pragma comment(lib,"SOIL.lib") //..a staticka knihovna
 
 #define DEFAULT_MIN_VIEW_HEIGHT 0.5f //Minimalni vyska zobrazeni nad terenem
 #define DEFAULT_PITCH_SPEED 0.1f //Vychozi rychlost otaceni
@@ -127,7 +129,7 @@ public:
     //Vykresleni modelu
     ModelDisplayListRecord* DrawModel(float x, float y, float z, uint32 modelid, AnimType Animation = ANIM_IDLE, bool collision = true, float scale = 1.0f, float rotate = 0.0f);
     //Vykresleni billboardu
-    BillboardDisplayListRecord* DrawBillboard(float x, float y, float z, uint32 TextureID, float width, float height);
+    BillboardDisplayListRecord* DrawBillboard(float x, float y, float z, uint32 TextureID, float width, float height, bool blend = false);
     void DrawModels();
     void DrawBillboards();
     void InitModelDisplayList();
@@ -162,6 +164,7 @@ enum TextureFileType
 {
     IMG_TYPE_BMP,
     IMG_TYPE_JPG,
+    IMG_TYPE_PNG,
     IMG_TYPE_NOT_SUPPORTED
 };
 
@@ -207,6 +210,7 @@ struct BillboardDisplayListRecord
     GLfloat x,y,z;
     GLfloat width,height;
     uint32 TextureID;
+    bool blend;
     //+animace?
 
     uint32 id;
@@ -232,6 +236,10 @@ public:
     //Nacitani jednotlivych textur ze souboru
     AUX_RGBImageRec* LoadBMP(char *Filename);
     void LoadJPG(char* filename, unsigned int * textureID);
+    void LoadPNG(char* filename, unsigned int * textureID);
+
+    //Nacte vsechny custom potrebna data k nacteni (preload)
+    void FillCustomNeededData();
 
     //Nacitani textur do pameti (podle listu potrebnych textur)
     void LoadFloorTextures();
