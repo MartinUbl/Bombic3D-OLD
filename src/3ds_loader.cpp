@@ -1,35 +1,11 @@
-//***********************************************************************//
-//                                                                         //
-//        - "Talk to me like I'm a 3 year old!" Programming Lessons -         //
-//                                                                       //
-//        $Author:        DigiBen        digiben@gametutorials.com             //
-//                                                                         //
-//        $Program:        3DS Animation                                     //
-//                                                                         //
-//        $Description:    Shows you how to animate .3DS key frame models   //
-//                                                                         //
-//        $Date:            10/22/01                                         //
-//                                                                         //
-//***********************************************************************//
-
+// Original code by DigiBen (digiben@gametutorials.com)
 #include <game_inc.h>
 
 // Global
-int gBuffer[50000] = {0};                    // This is a global buffer used to read past unwanted data
-
-///////////////////////////////// ROUND FLOAT \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
-/////
-/////    This rounds a float down to zero if it's smaller than 0.001 or -0.001
-/////
-///////////////////////////////// ROUND FLOAT \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
+int gBuffer[50000] = {0}; // This is a global buffer used to read past unwanted data
 
 float RoundFloat(float number)
 {
-    // For some strange reason when really small numbers were being
-    // read in, it stored them with scientific notation which didn't
-    // pass in correctly to some OpenGL calls.  So we just round them to 0.
-    // This might not be necessary though, it just seemed to work better.
-
     // If the float passed in is a really small number, set it to zero
     if(number > 0 && number <  0.001f) number = 0;
     if(number < 0 && number > -0.001f) number = 0;
@@ -38,30 +14,21 @@ float RoundFloat(float number)
     return number;
 }
 
-///////////////////////////////// CLOAD3DS \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
-/////
-/////    This constructor initializes the tChunk data
-/////
-///////////////////////////////// CLOAD3DS \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
-
+//Inicializace pametu pro docasne uloziste
 t3DSLoader::t3DSLoader()
 {
-    m_CurrentChunk = new tChunk;                // Initialize and allocate our current chunk
-    m_TempChunk = new tChunk;                    // Initialize and allocate a temporary chunk
+    m_CurrentChunk = new tChunk; // Initialize and allocate our current chunk
+    m_TempChunk = new tChunk;    // Initialize and allocate a temporary chunk
 }
 
+//A destruktor - opetovne uvolneni pameti
 t3DSLoader::~t3DSLoader()
 {
-    delete m_CurrentChunk;                      // Free the current chunk
-    delete m_TempChunk;                         // Free our temporary chunk
+    delete m_CurrentChunk;       // Free the current chunk
+    delete m_TempChunk;          // Free our temporary chunk
 }
 
-///////////////////////////////// IMPORT 3DS \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
-/////
-/////    This is called by the client to open the .3ds file, read it, then clean up
-/////
-///////////////////////////////// IMPORT 3DS \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
-
+//Nacteni 3DS modelu
 bool t3DSLoader::Import3DS(t3DModel *pModel, char *strFileName)
 {
     char strMessage[255] = {0};
@@ -111,6 +78,7 @@ bool t3DSLoader::Import3DS(t3DModel *pModel, char *strFileName)
     return true;
 }
 
+//Zvetsit/zmensit podle globalniho nastaveni velikosti modelu
 void t3DSLoader::ResizeObjects(t3DModel* pModel)
 {
     if(pModel->numOfObjects <= 0)
@@ -131,6 +99,7 @@ void t3DSLoader::ResizeObjects(t3DModel* pModel)
     }
 }
 
+//Pro "krabicovou" kolizi zjisteni a zapsani maximalnich souradnic
 void t3DSLoader::GetMaximumMinimumValues(t3DModel *pModel)
 {
     if(pModel->numOfObjects <= 0)
@@ -166,23 +135,13 @@ void t3DSLoader::GetMaximumMinimumValues(t3DModel *pModel)
     }
 }
 
-///////////////////////////////// CLEAN UP \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
-/////
-/////    This function cleans up our allocated memory and closes the file
-/////
-///////////////////////////////// CLEAN UP \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
-
+//Cleanup
 void t3DSLoader::CleanUp()
 {
-    fclose(m_FilePointer);                        // Close the current file pointer
+    fclose(m_FilePointer);       // Close the current file pointer
 }
 
-///////////////////////////////// PROCESS NEXT CHUNK\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
-/////
-/////    This function reads the main sections of the .3DS file, then dives deeper with recursion
-/////
-///////////////////////////////// PROCESS NEXT CHUNK\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
-
+//Rekurzivni funkce ktera nacte prvni data z 3DS souboru a rekurzivne zavola sama sebe pro nacteni dalsich
 void t3DSLoader::ProcessNextChunk(t3DModel *pModel, tChunk *pPreviousChunk)
 {
     t3DObject newObject;                        // This is used to add to our object list
@@ -201,17 +160,14 @@ void t3DSLoader::ProcessNextChunk(t3DModel *pModel, tChunk *pPreviousChunk)
         switch (m_CurrentChunk->ID)
         {
         case VERSION:                            // This holds the version of the file
-
             // Read the file version and add the bytes read to our bytesRead variable
             m_CurrentChunk->bytesRead += fread(&version, 1, m_CurrentChunk->length - m_CurrentChunk->bytesRead, m_FilePointer);
 
             // If the file version is over 3, give a warning that there could be a problem
             if (version > 0x03)
                 MessageBox(NULL, "This 3DS file is over version 3 so it may load incorrectly", "Warning", MB_OK);
-            break;
-
+            break
         case OBJECTINFO:                        // This holds the version of the mesh
-
             // Read the next chunk
             ReadChunk(m_TempChunk);
 
@@ -224,9 +180,7 @@ void t3DSLoader::ProcessNextChunk(t3DModel *pModel, tChunk *pPreviousChunk)
             // Go to the next chunk, which is the object has a texture, it should be MATERIAL, then OBJECT.
             ProcessNextChunk(pModel, m_CurrentChunk);
             break;
-
         case MATERIAL:                            // This holds the material information
-
             // Increase the number of materials
             pModel->numOfMaterials++;
 
@@ -236,9 +190,7 @@ void t3DSLoader::ProcessNextChunk(t3DModel *pModel, tChunk *pPreviousChunk)
             // Proceed to the material loading function
             ProcessNextMaterialChunk(pModel, m_CurrentChunk);
             break;
-
         case OBJECT:                            // This holds the name of the object being read
-
             // Increase the object count
             pModel->numOfObjects++;
 
@@ -254,9 +206,7 @@ void t3DSLoader::ProcessNextChunk(t3DModel *pModel, tChunk *pPreviousChunk)
             // Now proceed to read in the rest of the object information
             ProcessNextObjectChunk(pModel, &(pModel->pObject[pModel->numOfObjects - 1]), m_CurrentChunk);
             break;
-
         case KEYFRAME:
-
             // This is where we starting to read in all the key frame information.
             // This is read in at the END of the file.  It stores all the animation data.
 
@@ -266,9 +216,7 @@ void t3DSLoader::ProcessNextChunk(t3DModel *pModel, tChunk *pPreviousChunk)
             // Read past this chunk and add the bytes read to the byte counter
             m_CurrentChunk->bytesRead += fread(gBuffer, 1, m_CurrentChunk->length - m_CurrentChunk->bytesRead, m_FilePointer);
             break;
-
         default:
-
             // If we didn't care about a chunk, then we get here.  We still need
             // to read past the unknown or ignored chunk and add the bytes read to the byte counter.
             m_CurrentChunk->bytesRead += fread(gBuffer, 1, m_CurrentChunk->length - m_CurrentChunk->bytesRead, m_FilePointer);
@@ -284,13 +232,7 @@ void t3DSLoader::ProcessNextChunk(t3DModel *pModel, tChunk *pPreviousChunk)
     m_CurrentChunk = pPreviousChunk;
 }
 
-
-///////////////////////////////// PROCESS NEXT OBJECT CHUNK \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
-/////
-/////    This function handles all the information about the objects in the file
-/////
-///////////////////////////////// PROCESS NEXT OBJECT CHUNK \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
-
+//Nacteni dalsiho chunku z daneho objektu (rekurzivni)
 void t3DSLoader::ProcessNextObjectChunk(t3DModel *pModel, t3DObject *pObject, tChunk *pPreviousChunk)
 {
     // Allocate a new chunk to work with
@@ -306,33 +248,24 @@ void t3DSLoader::ProcessNextObjectChunk(t3DModel *pModel, t3DObject *pObject, tC
         switch (m_CurrentChunk->ID)
         {
         case OBJECT_MESH:                    // This lets us know that we are reading a new object
-
             // We found a new object, so let's read in it's info using recursion
             ProcessNextObjectChunk(pModel, pObject, m_CurrentChunk);
             break;
-
         case OBJECT_VERTICES:                // This is the objects vertices
             ReadVertices(pObject, m_CurrentChunk);
             break;
-
         case OBJECT_FACES:                    // This is the objects face information
             ReadVertexIndices(pObject, m_CurrentChunk);
             break;
-
         case OBJECT_MATERIAL:                // This holds the material name that the object has
-
             // We now will read the name of the material assigned to this object
             ReadObjectMaterial(pModel, pObject, m_CurrentChunk);
             break;
-
         case OBJECT_UV:                        // This holds the UV texture coordinates for the object
-
             // This chunk holds all of the UV coordinates for our object.  Let's read them in.
             ReadUVCoordinates(pObject, m_CurrentChunk);
             break;
-
         default:
-
             // Read past the ignored or unknown chunks
             m_CurrentChunk->bytesRead += fread(gBuffer, 1, m_CurrentChunk->length - m_CurrentChunk->bytesRead, m_FilePointer);
             break;
@@ -347,13 +280,7 @@ void t3DSLoader::ProcessNextObjectChunk(t3DModel *pModel, t3DObject *pObject, tC
     m_CurrentChunk = pPreviousChunk;
 }
 
-
-///////////////////////////////// PROCESS NEXT MATERIAL CHUNK \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
-/////
-/////    This function handles all the information about the material (Texture)
-/////
-///////////////////////////////// PROCESS NEXT MATERIAL CHUNK \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
-
+//Opet rekurzivni funkce pro nacteni dalsiho chunku materialu
 void t3DSLoader::ProcessNextMaterialChunk(t3DModel *pModel, tChunk *pPreviousChunk)
 {
     // Allocate a new chunk to work with
@@ -369,29 +296,21 @@ void t3DSLoader::ProcessNextMaterialChunk(t3DModel *pModel, tChunk *pPreviousChu
         switch (pModel, m_CurrentChunk->ID)
         {
         case MATNAME:                            // This chunk holds the name of the material
-
             // Here we read in the material name
             m_CurrentChunk->bytesRead += fread(pModel->pMaterials[pModel->numOfMaterials - 1].strName, 1, m_CurrentChunk->length - m_CurrentChunk->bytesRead, m_FilePointer);
             break;
-
         case MATDIFFUSE:                        // This holds the R G B color of our object
             ReadColorChunk(&(pModel->pMaterials[pModel->numOfMaterials - 1]), m_CurrentChunk);
             break;
-
         case MATMAP:                            // This is the header for the texture info
-
             // Proceed to read in the material information
             ProcessNextMaterialChunk(pModel, m_CurrentChunk);
             break;
-
         case MATMAPFILE:                        // This stores the file name of the material
-
             // Here we read in the material's file name
             m_CurrentChunk->bytesRead += fread(pModel->pMaterials[pModel->numOfMaterials - 1].strFile, 1, m_CurrentChunk->length - m_CurrentChunk->bytesRead, m_FilePointer);
             break;
-
         default:
-
             // Read past the ignored or unknown chunks
             m_CurrentChunk->bytesRead += fread(gBuffer, 1, m_CurrentChunk->length - m_CurrentChunk->bytesRead, m_FilePointer);
             break;
@@ -406,12 +325,7 @@ void t3DSLoader::ProcessNextMaterialChunk(t3DModel *pModel, tChunk *pPreviousChu
     m_CurrentChunk = pPreviousChunk;
 }
 
-///////////////////////////////// PROCESS NEXT KEYFRAME CHUNK \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
-/////
-/////    This function handles all the information about the keyframes (animation data)
-/////
-///////////////////////////////// PROCESS NEXT KEYFRAME CHUNK \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
-
+//Rekurzivni funkce pro nacitani keyframe (animace)
 void t3DSLoader::ProcessNextKeyFrameChunk(t3DModel *pModel, tChunk *pPreviousChunk)
 {
     char strKeyFrameObject[50] = {0};            // This stores the name of the current object being described
@@ -430,17 +344,13 @@ void t3DSLoader::ProcessNextKeyFrameChunk(t3DModel *pModel, tChunk *pPreviousChu
         switch (m_CurrentChunk->ID)
         {
         case KEYFRAME_MESH_INFO:                // This tells us there is a new object being described
-
             // This tells us that we have another objects animation data to be read,
             // so let's use recursion again so we read the next chunk and not read past this.
             ProcessNextKeyFrameChunk(pModel, m_CurrentChunk);
             break;
-
         case KEYFRAME_OBJECT_NAME:                // This stores the current objects name
-
             // Get the name of the object that the animation data being read is about.
             m_CurrentChunk->bytesRead += GetString(strKeyFrameObject);
-
             // Now that we have the object that is being described, set the m_CurrentObject.
             // That way we have a pointer to the object in the model to store the anim data.
             SetCurrentObject(pModel, strKeyFrameObject);
@@ -449,17 +359,13 @@ void t3DSLoader::ProcessNextKeyFrameChunk(t3DModel *pModel, tChunk *pPreviousChu
             // This will be used when we do a bone animation tutorial.
             m_CurrentChunk->bytesRead += fread(gBuffer, 1, m_CurrentChunk->length - m_CurrentChunk->bytesRead, m_FilePointer);
             break;
-
         case KEYFRAME_START_AND_END:            // This chunk stores the start and end frame
-
             // Read in the beginning frame and the end frame.  We just write over the
             // beginning frame because it is assumed that we will always start at the beginning (0)
             m_CurrentChunk->bytesRead += fread(&(pModel->numberOfFrames), 1, 4, m_FilePointer);
             m_CurrentChunk->bytesRead += fread(&(pModel->numberOfFrames), 1, 4, m_FilePointer);
             break;
-
         case PIVOT:                                // This stores the pivot point of the object
-
             // Here we read in 3 floats which are the (X, Y, Z) for the objects pivot point.
             // The pivot point is the local axis in which the object rotates around.  This is
             // By default (0, 0, 0), but may be changed manually in 3DS Max.
@@ -472,29 +378,21 @@ void t3DSLoader::ProcessNextKeyFrameChunk(t3DModel *pModel, tChunk *pPreviousChu
             m_CurrentObject->vPivot.y = m_CurrentObject->vPivot.z;
             m_CurrentObject->vPivot.z = -temp;
             break;
-
         case POSITION_TRACK_TAG:                // This stores the translation position each frame
-
             // Now we want to read in the positions for each frame of the animation
             ReadKeyFramePositions(pModel, m_CurrentChunk);
             break;
-
         case ROTATION_TRACK_TAG:                // This stores the rotation values for each KEY frame
-
             // Now we want to read in the rotations for each KEY frame of the animation.
             // This doesn't store rotation values for each frame like scale and translation,
             // so we need to interpolate between each frame.
             ReadKeyFrameRotations(pModel, m_CurrentChunk);
             break;
-
         case SCALE_TRACK_TAG:                    // This stores the scale values for each frame
-
             // Now we want to read in the scale value for each frame of the animation
             ReadKeyFrameScales(pModel, m_CurrentChunk);
             break;
-
         default:
-
             // Read past the ignored or unknown chunks
             m_CurrentChunk->bytesRead += fread(gBuffer, 1, m_CurrentChunk->length - m_CurrentChunk->bytesRead, m_FilePointer);
             break;
@@ -509,12 +407,7 @@ void t3DSLoader::ProcessNextKeyFrameChunk(t3DModel *pModel, tChunk *pPreviousChu
     m_CurrentChunk = pPreviousChunk;
 }
 
-///////////////////////////////// READ CHUNK \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
-/////
-/////    This function reads in a chunk ID and it's length in bytes
-/////
-///////////////////////////////// READ CHUNK \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
-
+//Nacte defaultni chunk z 3DS souboru
 void t3DSLoader::ReadChunk(tChunk *pChunk)
 {
     // This reads the chunk ID which is 2 bytes.
@@ -524,12 +417,7 @@ void t3DSLoader::ReadChunk(tChunk *pChunk)
     pChunk->bytesRead += fread(&pChunk->length, 1, 4, m_FilePointer);
 }
 
-///////////////////////////////// GET STRING \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
-/////
-/////    This function reads in a string of characters
-/////
-///////////////////////////////// GET STRING \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
-
+//Presne jak napovida nazev funkce - ziska retezec
 int t3DSLoader::GetString(char *pBuffer)
 {
     int index = 0;
@@ -548,13 +436,7 @@ int t3DSLoader::GetString(char *pBuffer)
     return strlen(pBuffer) + 1;
 }
 
-
-///////////////////////////////// READ COLOR \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
-/////
-/////    This function reads in the RGB color data
-/////
-///////////////////////////////// READ COLOR \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
-
+//Precte barvi v RGB formatu
 void t3DSLoader::ReadColorChunk(tMaterialInfo *pMaterial, tChunk *pChunk)
 {
     // Read the color chunk info
@@ -567,13 +449,7 @@ void t3DSLoader::ReadColorChunk(tMaterialInfo *pMaterial, tChunk *pChunk)
     pChunk->bytesRead += m_TempChunk->bytesRead;
 }
 
-
-///////////////////////////////// READ VERTEX INDECES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
-/////
-/////    This function reads in the indices for the vertex array
-/////
-///////////////////////////////// READ VERTEX INDECES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
-
+//Nacte indices vertexu
 void t3DSLoader::ReadVertexIndices(t3DObject *pObject, tChunk *pPreviousChunk)
 {
     unsigned short index = 0;                    // This is used to read in the current face index
@@ -604,13 +480,7 @@ void t3DSLoader::ReadVertexIndices(t3DObject *pObject, tChunk *pPreviousChunk)
     }
 }
 
-
-///////////////////////////////// READ UV COORDINATES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
-/////
-/////    This function reads in the UV coordinates for the object
-/////
-///////////////////////////////// READ UV COORDINATES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
-
+//Nacte UV koordinaty
 void t3DSLoader::ReadUVCoordinates(t3DObject *pObject, tChunk *pPreviousChunk)
 {
     // Read in the number of UV coordinates there are (int)
@@ -623,13 +493,7 @@ void t3DSLoader::ReadUVCoordinates(t3DObject *pObject, tChunk *pPreviousChunk)
     pPreviousChunk->bytesRead += fread(pObject->pTexVerts, 1, pPreviousChunk->length - pPreviousChunk->bytesRead, m_FilePointer);
 }
 
-
-///////////////////////////////// READ VERTICES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
-/////
-/////    This function reads in the vertices for the object
-/////
-///////////////////////////////// READ VERTICES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
-
+//Nacte vertexy
 void t3DSLoader::ReadVertices(t3DObject *pObject, tChunk *pPreviousChunk)
 {
     // Read in the number of vertices (int)
@@ -657,13 +521,7 @@ void t3DSLoader::ReadVertices(t3DObject *pObject, tChunk *pPreviousChunk)
     }
 }
 
-
-///////////////////////////////// READ OBJECT MATERIAL \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
-/////
-/////    This function reads in the material name assigned to the object and sets the materialID
-/////
-///////////////////////////////// READ OBJECT MATERIAL \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
-
+//Nacte material objektu
 void t3DSLoader::ReadObjectMaterial(t3DModel *pModel, t3DObject *pObject, tChunk *pPreviousChunk)
 {
     char strMaterial[255] = {0};            // This is used to hold the objects material name
@@ -702,12 +560,7 @@ void t3DSLoader::ReadObjectMaterial(t3DModel *pModel, t3DObject *pObject, tChunk
     pPreviousChunk->bytesRead += fread(gBuffer, 1, pPreviousChunk->length - pPreviousChunk->bytesRead, m_FilePointer);
 }
 
-///////////////////////////////// READ KEYFRAME POSITIONS \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
-/////
-/////    This function reads in the positions of the current object for every frame
-/////
-///////////////////////////////// READ KEYFRAME POSITIONS \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
-
+//Pozice keyframe..
 void t3DSLoader::ReadKeyFramePositions(t3DModel *pModel, tChunk *pPreviousChunk)
 {
     short frameNumber= 0, flags= 0, ignored= 0;
@@ -779,13 +632,7 @@ void t3DSLoader::ReadKeyFramePositions(t3DModel *pModel, tChunk *pPreviousChunk)
     }
 }
 
-
-///////////////////////////////// READ KEYFRAME ROTATIONS \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
-/////
-/////    This function reads in the rotations of the current object for every key frame
-/////
-///////////////////////////////// READ KEYFRAME ROTATIONS \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
-
+//Keyframe otoceni
 void t3DSLoader::ReadKeyFrameRotations(t3DModel *pModel, tChunk *pPreviousChunk)
 {
     short frameNumber = 0, flags = 0, rotkeys = 0, ignored = 0;
@@ -924,37 +771,14 @@ void t3DSLoader::ReadKeyFrameRotations(t3DModel *pModel, tChunk *pPreviousChunk)
             m_CurrentObject->vRotDegree.push_back(0.0f);
         }
     }
-
-    // One thing I might want to point out is that you can do the rotations 2
-    // different ways.  To avoid a complicated tutorial I did NOT use matrices.
-    // I started out doing it that way, but at the end changed it to just use a
-    // bunch of glRotatef()'s.  You will notice in the AnimateModel() function
-    // I do a for loop that calls glRotatef() for every frame.  The other way to
-    // do this is create a matrix class that then matrix multiplies the rotation
-    // by the current matrix.  Since we don't have a matrix class tutorial up yet
-    // I decided not try and teach that at the same time.  In the next bone animation
-    // tutorial we WILL use matrices though.  We should also have a matrix class tutorial too.
 }
 
-
-///////////////////////////////// READ KEYFRAME SCALE \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
-/////
-/////    This function reads in the scale value of the current object for every key frame
-/////
-///////////////////////////////// READ KEYFRAME SCALES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
-
+//Keyframe zvetseni/zmenseni
 void t3DSLoader::ReadKeyFrameScales(t3DModel *pModel, tChunk *pPreviousChunk)
 {
     short frameNumber = 0, ignore = 0, flags = 0;
     long lunknown = 0;
     int i = 0;
-
-    // Like the translation key frame data, the scale ratio is stored for
-    // every frame in the animation, not just for every key frame.  This makes
-    // it so we don't have to interpolate between frames.
-    // The first 5 short's are ignored because we do not utilize
-    // them in this tutorial.  they are flags, the node ID, tension, bias, strength
-    // I believe.  Don't worry about them now, the next tutorial we will further explain it.
 
     // Read past the ignored data
     pPreviousChunk->bytesRead += fread(&ignore, 1, sizeof(short), m_FilePointer);
@@ -1012,23 +836,9 @@ void t3DSLoader::ReadKeyFrameScales(t3DModel *pModel, tChunk *pPreviousChunk)
     }
 }
 
-
-///////////////////////////////// SET CURRENT OBJECT \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
-/////
-/////    This sets the current model that animation is being read in for by it's name
-/////
-///////////////////////////////// SET CURRENT OBJECT \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
-
+//Jen organizace
 void t3DSLoader::SetCurrentObject(t3DModel *pModel, char *strObjectName)
 {
-    // This function takes a model and name of an object inside of the model.
-    // It then searches the objects in the model and finds that object that
-    // has the name passed in.  We use this function after we have read in
-    // all the model's data, except for the KEY FRAME data.  The key frame
-    // data is last.  The key frame animation data stores the objects name
-    // that the data is describing, so we need to get that address to
-    // that object and then set the animation data being read in for it.
-
     // Make sure there was a valid object name passed in
     if(!strObjectName)
     {
@@ -1126,12 +936,7 @@ CVector3 Normalize(CVector3 vNormal)
     return vNormal;                                // Return the normal
 }
 
-///////////////////////////////// COMPUTER NORMALS \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
-/////
-/////    This function computes the normals and vertex normals of the objects
-/////
-///////////////////////////////// COMPUTER NORMALS \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
-
+//Vypocte normaly pro vertexy
 void t3DSLoader::ComputeNormals(t3DModel *pModel)
 {
     CVector3 vVector1, vVector2, vNormal, vPoly[3];
@@ -1205,4 +1010,3 @@ void t3DSLoader::ComputeNormals(t3DModel *pModel)
         delete [] pNormals;
     }
 }
-

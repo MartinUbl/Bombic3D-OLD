@@ -166,10 +166,6 @@
 			Name="src"
 			>
 			<File
-				RelativePath="..\..\src\3ds.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\connection.cpp"
 				>
 			</File>
@@ -198,15 +194,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\jpeg_loader.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\main.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\map.cpp"
 				>
 			</File>
 			<File
@@ -221,6 +209,30 @@
 				RelativePath="..\..\src\util.cpp"
 				>
 			</File>
+			<Filter
+				Name="Loading"
+				>
+				<File
+					RelativePath="..\..\src\3ds_loader.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\content_loader.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\datastore_loaders.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\image_loaders.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\map_loaders.cpp"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="include"

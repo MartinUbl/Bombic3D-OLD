@@ -1,7 +1,6 @@
 #include <game_inc.h>
 
-#define DATA_SEPARATOR 95 //znak _
-#define CHAR_MOVER 48 //posun v ASCII øadì (protože 0 je 48 => 48-48 do heightmap)
+#define CHAR_MOVER 48 //posun v ASCII rade (protoze 0 je 48 => 48-48 do heightmap)
 
 bool Display::UnloadMap()
 {
@@ -84,6 +83,7 @@ bool Display::LoadMap(const char* HeightFile, const char* TextureMap)
     gDisplayStore.NeededFloorTextures.push_back(DefTexture);
     actmap.DefaultTexture = DefTexture;
 
+    // Alokace pameti pro potrebny pocet radku a sloupcu (dalo by se delat za behu pomoci realloc)
     actmap.Content = (GLfloat**)malloc((sloupcu+1)*sizeof(GLfloat*));
     actmap.ContentTextures = (GLfloat**)malloc((sloupcu+1)*sizeof(GLfloat*));
     for(int i = 0; i < (sloupcu+1); i++)
@@ -160,37 +160,3 @@ bool Display::LoadMap(const char* HeightFile, const char* TextureMap)
 
     return true;
 }
-
-//Vypocet Y pozice podle vyskove mapy zadane v parametru, univerzalni
-GLfloat Display::CalculateVertexPos(int32 i, int32 j, uint8 vertex)
-{
-    /*switch(vertex)
-    {
-    case V_ZL:
-        return actmap.Content[i][j];
-    case V_ZP:
-        if(i+1 >= actmap.Width)
-            return actmap.Content[i][j];
-        return actmap.Content[i+1][j];
-    case V_PL:
-        if(j+1 >= actmap.Height)
-            return actmap.Content[i][j];
-        return actmap.Content[i][j+1];
-    case V_PP:
-        if(i+1 >= actmap.Width)
-            if(j+1 < actmap.Height)
-                return actmap.Content[i][j+1];
-            else
-                return actmap.Content[i][j];
-        if(j+1 >= actmap.Height)
-            if(i+1 < actmap.Width)
-                return actmap.Content[i+1][j];
-            else
-                return actmap.Content[i][j];
-        return actmap.Content[i+1][j+1];
-    }*/
-
-    //return actmap.Content[i][j];
-    return 0;
-}
-

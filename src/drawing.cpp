@@ -531,6 +531,12 @@ void Display::DrawBillboards()
                 break;
         }
 
+        glLoadIdentity();
+
+        glRotatef(v_angle,1.0f,0.0f,0.0f);
+        glRotatef(h_angle,0.0f,-1.0f,0.0f);
+        glTranslatef(view_x-MODPOS_X,view_y,view_z-MODPOS_Z);
+
         glBindTexture(GL_TEXTURE_2D, gDisplayStore.FloorTextures[temp->TextureID]);
 
         // TODO: vykreslit pruhledny objekty az na konci
@@ -543,7 +549,8 @@ void Display::DrawBillboards()
         {
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-            glColor4f(1,1,1,0.85);
+            //TODO: blending zvlast kanalu
+            //glColor4f(1,1,1,0.85);
         }
         glTranslatef(temp->x*MAP_SCALE_X,temp->y*MAP_SCALE_Y,temp->z*MAP_SCALE_Z);
         glRotatef(90.0f+h_angle,0.0f,1.0f,0.0f);
@@ -614,237 +621,6 @@ bool DisplayStore::IsAlreadyNeededTexture(uint32 TextureID)
             return true;
 
     return false;
-}
-
-//Nacteni textur pro podlahu
-void DisplayStore::LoadFloorTextures()
-{
-    if(NeededFloorTextures.empty())
-        return;
-
-    for(std::list<uint32>::const_iterator itr = NeededFloorTextures.begin(); itr != NeededFloorTextures.end(); ++itr)
-    {
-        uint32 TextureID = *itr;
-        const char *ImageFilename = gDataStore.TextureData[TextureID].filename.c_str();
-
-        switch(GetImageFormat((char*)gDataStore.TextureData[TextureID].filename.c_str()))
-        {
-            case IMG_TYPE_BMP:
-            {
-                AUX_RGBImageRec *TextureImage = LoadBMP((char*)ImageFilename);
-                if(TextureImage)
-                {
-                    glGenTextures(1, &FloorTextures[TextureID]);
-
-                    glBindTexture(GL_TEXTURE_2D, FloorTextures[TextureID]);
-                    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-                    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_NEAREST);
-                    gluBuild2DMipmaps(GL_TEXTURE_2D, 3, TextureImage->sizeX, TextureImage->sizeY, GL_RGB, GL_UNSIGNED_BYTE, TextureImage->data);
-
-                    gDataStore.TextureData[TextureID].loaded = true;
-
-                    if(TextureImage->data)
-                    {
-                        free(TextureImage->data);
-                    }
-                    free(TextureImage);
-                }
-                break;
-            }
-            case IMG_TYPE_JPG:
-            {
-                LoadJPG((char*)ImageFilename,&FloorTextures[TextureID]);
-                gDataStore.TextureData[TextureID].loaded = true;
-                break;
-            }
-            case IMG_TYPE_PNG:
-            {
-                LoadPNG((char*)ImageFilename,&FloorTextures[TextureID]);
-                gDataStore.TextureData[TextureID].loaded = true;
-                break;
-            }
-            default:
-                break;
-        }
-    }
-}
-
-TextureFileType DisplayStore::GetImageFormat(char *Filename)
-{
-    vector<string> parsed;
-    parsed.clear();
-    parsed = explode(Filename,'.');
-    if(parsed.size() > 0)
-    {
-        string extension = parsed[parsed.size()-1].substr(parsed[parsed.size()-1].find_last_of(".")+1);
-
-        for(int i = 0; i < extension.size(); ++i)
-            extension[i] = toupper(extension.c_str()[i]);
-
-        if(extension == "JPG" || extension == "JPEG")
-            return IMG_TYPE_JPG;
-        if(extension == "BMP")
-            return IMG_TYPE_BMP;
-        if(extension == "PNG")
-            return IMG_TYPE_PNG;
-    }
-    return IMG_TYPE_NOT_SUPPORTED;
-}
-
-//Nacteni BMP textury
-AUX_RGBImageRec* DisplayStore::LoadBMP(char *Filename)
-{
-    FILE *File = NULL;
-    if (!Filename)
-    {
-        return NULL;
-    }
-    File = fopen(Filename,"r");
-    if (File)
-    {
-        fclose(File);
-        return auxDIBImageLoad(Filename);
-    }
-    return NULL;
-}
-
-//Nacteni JPG textury
-void DisplayStore::LoadJPG(char *filename, unsigned int *textureID)
-{
-    read_JPEG_file(filename,textureID);
-}
-
-//Nacteni PNG textury
-void DisplayStore::LoadPNG(char *filename, unsigned int *textureID)
-{
-    int width = 0, height = 0, channels = 0;
-    GLubyte * imgArray;
-    imgArray = SOIL_load_image (
-        filename,
-        &width, &height, &channels,
-        SOIL_LOAD_AUTO
-        );
-
-    glGenTextures(1, textureID);
-    glBindTexture(GL_TEXTURE_2D, *textureID);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    if(channels == 4)
-    {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, imgArray);
-    }
-    else
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, imgArray);
-
-    SOIL_free_image_data( imgArray );
-
-    //unsigned int text_id_value = SOIL_load_OGL_texture(filename,SOIL_LOAD_AUTO,SOIL_CREATE_NEW_ID,0);
-    //textureID = &text_id_value;
-}
-
-//Nacteni textur pro modely
-void DisplayStore::LoadModelTextures()
-{
-    if(NeededModelTextures.empty())
-        return;
-
-    for(std::list<uint32>::const_iterator itr = NeededModelTextures.begin(); itr != NeededModelTextures.end(); ++itr)
-    {
-        uint32 TextureID = *itr;
-        const char *ImageFilename = ModelTextureFilenames[TextureID].first.c_str();
-
-        switch(GetImageFormat((char*)ImageFilename))
-        {
-            case IMG_TYPE_BMP:
-            {
-                AUX_RGBImageRec *TextureImage = LoadBMP((char*)ImageFilename);
-                if(TextureImage)
-                {
-                    glGenTextures(1, &ModelTextures[TextureID]);
-                    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-                    glBindTexture(GL_TEXTURE_2D, ModelTextures[TextureID]);
-                    gluBuild2DMipmaps(GL_TEXTURE_2D, 3, TextureImage->sizeX, TextureImage->sizeY, GL_RGB, GL_UNSIGNED_BYTE, TextureImage->data);
-                    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-                    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-
-                    ModelTextureFilenames[TextureID].second = true;
-                    Models[TextureMaterialAssign[TextureID].first].pMaterials[TextureMaterialAssign[TextureID].second].texureId = ModelTextures[TextureID];
-
-                    if(TextureImage->data)
-                    {
-                        free(TextureImage->data);
-                    }
-                    free(TextureImage);
-                }
-                break;
-            }
-            case IMG_TYPE_JPG:
-            {
-                LoadJPG((char*)ImageFilename,&ModelTextures[TextureID]);
-                break;
-            }
-            case IMG_TYPE_PNG:
-            {
-                LoadPNG((char*)ImageFilename,&ModelTextures[TextureID]);
-                break;
-            }
-            default:
-                break;
-        }
-    }
-}
-
-//Nacteni 3D modelu do pameti (podle listu potrebnych)
-void DisplayStore::LoadModels()
-{
-    if(NeededModels.empty())
-        return;
-
-    TextureMaterialAssign.clear();
-    ModelTextureFilenames.clear();
-
-    unsigned int TextureID = 0;
-
-    for(std::list<uint32>::const_iterator itr = NeededModels.begin(); itr != NeededModels.end(); ++itr)
-    {
-        uint32 ModelID = (*itr);
-        const char* ModelFilename = gDataStore.ModelData[ModelID].filename.c_str();
-
-        if(!ModelFilename || ModelFilename == "")
-        {
-            //TODO: vyhodit error
-            break;
-        }
-        if(!fopen(ModelFilename,"r"))
-        {
-            //TODO: vyhodit error
-            break;
-        }
-        if(!(ModelLoader.Import3DS(&Models[ModelID], (char*)ModelFilename)))
-        {
-            //TODO: vyhodit error
-            break;
-        }
-        for(int i = 0; i < Models[ModelID].numOfMaterials; i++)
-        {
-            if(strlen(Models[ModelID].pMaterials[i].strFile) > 0)
-            {
-                char TmpFilename[64];
-                sprintf(TmpFilename,"%s/%s",DATA_PATH,Models[ModelID].pMaterials[i].strFile);
-
-                ModelTextureFilenames[TextureID].first = TmpFilename; //Jmeno souboru s texturou
-                ModelTextureFilenames[TextureID].second = false;      //Textura neni nactena
-                TextureMaterialAssign[TextureID].first = ModelID;     //K jakemu modelu textura patri
-                TextureMaterialAssign[TextureID].second = i;          //A k jakemu materialu patri
-
-                NeededModelTextures.push_back(TextureID); //A pridat nasi texturu do listu potrebnych textur
-
-                TextureID++;
-            }
-            Models[ModelID].pMaterials[i].texureId = TextureID;
-        }
-    }
 }
 
 //Vraci texturu pro dany material objektu na modelu (ulozene hodnoty z nacitani modelu)

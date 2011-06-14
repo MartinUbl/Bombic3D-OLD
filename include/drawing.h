@@ -36,15 +36,6 @@
 struct ModelDisplayListRecord;
 struct BillboardDisplayListRecord;
 
-//pomocny enum pro pozice na vyskove mape
-enum Vertices
-{
-    V_ZL,
-    V_ZP,
-    V_PL,
-    V_PP
-};
-
 //typy pole na mape
 enum FieldType
 {
@@ -110,7 +101,6 @@ public:
     //Manazer mapy
     bool LoadMap(const char* HeightFile, const char* TextureMap);
     bool UnloadMap();
-    GLfloat CalculateVertexPos(int32 i, int32 j, uint8 vertex);
 
     //Kolize
     unsigned short CheckColision(float newx, float newy, float newz);
@@ -234,9 +224,10 @@ public:
     TextureFileType GetImageFormat(char *Filename);
 
     //Nacitani jednotlivych textur ze souboru
-    AUX_RGBImageRec* LoadBMP(char *Filename);
-    void LoadJPG(char* filename, unsigned int * textureID);
-    void LoadPNG(char* filename, unsigned int * textureID);
+    AUX_RGBImageRec* PreLoadBMP(char *Filename);
+    void LoadBMP(char* filename, unsigned int *textureID);
+    void LoadJPG(char* filename, unsigned int *textureID);
+    void LoadPNG(char* filename, unsigned int *textureID);
 
     //Nacte vsechny custom potrebna data k nacteni (preload)
     void FillCustomNeededData();
