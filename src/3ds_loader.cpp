@@ -166,7 +166,7 @@ void t3DSLoader::ProcessNextChunk(t3DModel *pModel, tChunk *pPreviousChunk)
             // If the file version is over 3, give a warning that there could be a problem
             if (version > 0x03)
                 MessageBox(NULL, "This 3DS file is over version 3 so it may load incorrectly", "Warning", MB_OK);
-            break
+            break;
         case OBJECTINFO:                        // This holds the version of the mesh
             // Read the next chunk
             ReadChunk(m_TempChunk);

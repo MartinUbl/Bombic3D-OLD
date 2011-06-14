@@ -474,10 +474,10 @@ void Display::DrawMap()
             {
                 glBegin(GL_POLYGON);
                     glNormal3f(0.0f,-1.0f, 0.0f);
-                    glTexCoord2f(1.0f, 1.0f); glVertex3f((px-1)*MAP_SCALE_X, CalculateVertexPos(i,j,V_ZL)*MAP_SCALE_Y, (py-1)*MAP_SCALE_Z);
-                    glTexCoord2f(0.0f, 1.0f); glVertex3f((px  )*MAP_SCALE_X, CalculateVertexPos(i,j,V_ZP)*MAP_SCALE_Y, (py-1)*MAP_SCALE_Z);
-                    glTexCoord2f(0.0f, 0.0f); glVertex3f((px  )*MAP_SCALE_X, CalculateVertexPos(i,j,V_PP)*MAP_SCALE_Y, (py  )*MAP_SCALE_Z);
-                    glTexCoord2f(1.0f, 0.0f); glVertex3f((px-1)*MAP_SCALE_X, CalculateVertexPos(i,j,V_PL)*MAP_SCALE_Y, (py  )*MAP_SCALE_Z);
+                    glTexCoord2f(1.0f, 1.0f); glVertex3f((px-1)*MAP_SCALE_X, 0*MAP_SCALE_Y, (py-1)*MAP_SCALE_Z);
+                    glTexCoord2f(0.0f, 1.0f); glVertex3f((px  )*MAP_SCALE_X, 0*MAP_SCALE_Y, (py-1)*MAP_SCALE_Z);
+                    glTexCoord2f(0.0f, 0.0f); glVertex3f((px  )*MAP_SCALE_X, 0*MAP_SCALE_Y, (py  )*MAP_SCALE_Z);
+                    glTexCoord2f(1.0f, 0.0f); glVertex3f((px-1)*MAP_SCALE_X, 0*MAP_SCALE_Y, (py  )*MAP_SCALE_Z);
                 glEnd();
             }
             else if (actmap.Content[i][j] == TYPE_BOX)
