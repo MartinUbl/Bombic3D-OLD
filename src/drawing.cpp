@@ -539,16 +539,13 @@ void Display::DrawBillboards()
 
         glBindTexture(GL_TEXTURE_2D, gDisplayStore.FloorTextures[temp->TextureID]);
 
-        // TODO: vykreslit pruhledny objekty az na konci
-        // TODO2: vykreslit pruhledny objekty dvakrat, aby se zarucila viditelnost pruhlednych objektu
-        //        za pruhlednymi objekty
-
         // Pruhledne objekty potrebuji mit zapnuty mod pro blending a mod one minus src alpha pro
         // spravne vykresleni pruhlednosti
         if (temp->blend)
         {
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+            glDisable(GL_DEPTH_TEST);
             //TODO: blending zvlast kanalu
             //glColor4f(1,1,1,0.85);
         }
@@ -563,7 +560,10 @@ void Display::DrawBillboards()
         glEnd();
         // Nezapomeneme vypnout blending, jen jako slusnacci
         if (temp->blend)
+        {
+            glEnable(GL_DEPTH_TEST);
             glDisable(GL_BLEND);
+        }
     }
     glLoadIdentity();
 
