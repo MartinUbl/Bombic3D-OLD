@@ -59,7 +59,8 @@ void Display::Initialize()
     text[2] = 0;
     gTextureAnimationMgr.AddAnimatedTexture(text,3,500);
     //Pracovni billboard
-    DrawBillboard(2,4,2,3,1,3,true);
+    DrawBillboard(2,2,2,3,1,3,true);
+    DrawBillboard(2.5f,2,2.5f,3,1,3,true);
 }
 
 void DisplayStore::FillCustomNeededData()
@@ -556,7 +557,9 @@ void Display::DrawBillboards()
         {
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-            glDisable(GL_DEPTH_TEST);
+            //Nechat depth test pro ted zapnuty, dokud nenajdu lepsi zpusob korektniho vykresleni
+            //Zpusobuje nepruhlednost vykreslenych spritu vuci jinym spritum
+            //glDisable(GL_DEPTH_TEST);
             //TODO: blending zvlast kanalu
             //glColor4f(1,1,1,0.85);
         }
@@ -572,7 +575,7 @@ void Display::DrawBillboards()
         // Nezapomeneme vypnout blending, jen jako slusnacci
         if (temp->blend)
         {
-            glEnable(GL_DEPTH_TEST);
+            //glEnable(GL_DEPTH_TEST);
             glDisable(GL_BLEND);
         }
     }
