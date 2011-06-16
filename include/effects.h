@@ -91,5 +91,42 @@ protected:
 
 extern EmitterMgr gEmitterMgr;
 
+//Struktura statickeho zaznamu pro animaci textury
+struct TextureAnimData
+{
+    uint32 *Textures;
+    uint16 totalTextures;
+    uint32 time;
+};
+
+//Struktura dynamickeho zaznamu animace textury (billboard)
+struct BillboardTextureAnimRecord
+{
+    TextureAnimData* data;
+    BillboardDisplayListRecord* source;
+    uint32 actual_time;
+    uint16 actual_texture_pos;
+};
+
+//Trida starajici se o prubeh animaci a uchovavani statickych dat animaci
+class TextureAnimationMgr
+{
+public:
+    TextureAnimationMgr();
+    ~TextureAnimationMgr();
+
+    void AddAnimatedTexture(uint32 *Textures, uint16 texturesCount, uint32 time);
+
+    bool IsAnimatedTexture(uint32 textureID) { return AnimatedData.find(textureID) != AnimatedData.end(); }
+    void AddAnimatedBillboard(BillboardDisplayListRecord* src);
+
+    void Update(const clock_t diff);
+protected:
+    map<uint32, TextureAnimData*> AnimatedData;
+    list<BillboardTextureAnimRecord*> BillboardAnimList;
+};
+
+extern TextureAnimationMgr gTextureAnimationMgr;
+
 #endif
 

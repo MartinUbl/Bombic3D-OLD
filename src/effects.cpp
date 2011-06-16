@@ -2,6 +2,7 @@
 #include <algorithm>
 
 EmitterMgr gEmitterMgr;
+TextureAnimationMgr gTextureAnimationMgr;
 
 ParticleEmitter::ParticleEmitter()
 {
@@ -194,5 +195,68 @@ void EmitterMgr::Update(const clock_t diff)
             continue;
         }
     }
+}
+
+//////////////////////////////////
+// Animace                      //
+//////////////////////////////////
+
+TextureAnimationMgr::TextureAnimationMgr()
+{
+}
+
+TextureAnimationMgr::~TextureAnimationMgr()
+{
+    //TODO: cleanup, uvolneni pameti
+}
+
+void TextureAnimationMgr::AddAnimatedTexture(uint32 *Textures, uint16 texturesCount, uint32 time)
+{
+    if (texturesCount == 0 || !Textures || time == 0)
+        return;
+
+    TextureAnimData* pTemp = new TextureAnimData;
+    pTemp->Textures = Textures;
+    pTemp->totalTextures = texturesCount;
+    pTemp->time = time;
+
+    AnimatedData[Textures[0]] = pTemp;
+}
+
+void TextureAnimationMgr::AddAnimatedBillboard(BillboardDisplayListRecord *src)
+{
+    if (!src || !IsAnimatedTexture(src->TextureID))
+        return;
+
+    BillboardTextureAnimRecord* pTemp = new BillboardTextureAnimRecord;
+    pTemp->actual_time = 0;
+    pTemp->actual_texture_pos = 0;
+    pTemp->source = src;
+    pTemp->data = AnimatedData[src->TextureID];
+
+    BillboardAnimList.push_back(pTemp);
+}
+
+void TextureAnimationMgr::Update(const clock_t diff)
+{
+    if (!BillboardAnimList.empty())
+    {
+        for (std::list<BillboardTextureAnimRecord*>::iterator itr = BillboardAnimList.begin(); itr != BillboardAnimList.end(); ++itr)
+        {
+            (*itr)->actual_time += (uint32)diff;
+            // Pokud jsme dospeli do casu kdy je treba zmenit texturu, do toho
+            if ((*itr)->actual_time >= (*itr)->data->time)
+            {
+                (*itr)->actual_time = 0;
+                (*itr)->actual_texture_pos += 1;
+                if ((*itr)->actual_texture_pos >= (*itr)->data->totalTextures)
+                    (*itr)->actual_texture_pos = 0;
+
+                (*itr)->source->TextureID = (*itr)->data->Textures[(*itr)->actual_texture_pos];
+            }
+        }
+    }
+
+    // Prostor pro dalsi druhy animace (v budoucnu i floor textury)
 }
 

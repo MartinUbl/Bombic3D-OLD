@@ -265,6 +265,7 @@ int DrawGLScene(GLvoid)
     gDisplay.DoTick();
     gTimer.Update(diff);
     gEmitterMgr.Update(diff);
+    gTextureAnimationMgr.Update(diff);
 
     return TRUE;
 }

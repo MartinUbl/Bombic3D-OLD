@@ -51,6 +51,13 @@ void Display::Initialize()
     }
     //Pracovni emitter, vymazat po doladeni
     //gEmitterMgr.AddEmitter(-view_x,-view_y,-view_z,0,2,0,1,3,0.3f,0.5f,3,6,10000,10000,1000,10,false,EMIT_FLAG_RANDOM_ROTATE);
+    //Pracovni animace
+    //TODO: vymyslet hezci zpusob inicializace
+    uint32 *text = new uint32[3];
+    text[0] = 3;
+    text[1] = 2;
+    text[2] = 0;
+    gTextureAnimationMgr.AddAnimatedTexture(text,3,500);
     //Pracovni billboard
     DrawBillboard(2,4,2,3,1,3,true);
 }
@@ -585,6 +592,9 @@ BillboardDisplayListRecord* Display::DrawBillboard(float x, float y, float z, ui
     pTemp->height = height;
     pTemp->id = gDisplayStore.GetFreeID(TYPE_BILLBOARD);
     pTemp->blend = blend;
+
+    if (gTextureAnimationMgr.IsAnimatedTexture(TextureID))
+        gTextureAnimationMgr.AddAnimatedBillboard(pTemp);
 
     gDisplayStore.BillboardDisplayList.push_back(pTemp);
     return pTemp;
