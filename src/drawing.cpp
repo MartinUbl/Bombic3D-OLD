@@ -113,7 +113,10 @@ void Display::DoTick()
     //Vykresleni mapy
     DrawMap();
 
-    //Vykresleni billboardu
+    //Vykresleni modelu
+    DrawModels();
+
+    //Vykresleni billboardu (nakonec, kvuli korektnosti vykresleni)
     DrawBillboards();
 
     uint32 pdiff = (uint32)m_diff & 0xFFFF;
@@ -123,7 +126,6 @@ void Display::DoTick()
     //Vykresleni uzivatelskeho rozhrani
     //gInterface.Draw();
 
-    DrawModels();
     DrawTexts();
 
     glTranslatef(+MODPOS_X,0,+MODPOS_Z);
@@ -400,6 +402,7 @@ void Display::DrawModels()
         }
     }
 
+    glEnable(GL_TEXTURE_2D);
     glColor3ub(255, 255, 255);
 }
 
@@ -539,6 +542,7 @@ void Display::DrawBillboards()
         }
 
         glLoadIdentity();
+        glColor3ub(255, 255, 255);
 
         glRotatef(v_angle,1.0f,0.0f,0.0f);
         glRotatef(h_angle,0.0f,-1.0f,0.0f);
