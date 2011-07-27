@@ -58,7 +58,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="opengl32.lib glu32.lib glut32.lib glaux.lib odbc32.lib odbccp32.lib WINMM.LIB SDL.lib SDLmain.lib SDL_net.lib"
+				AdditionalDependencies="opengl32.lib glu32.lib glut32.lib glaux.lib odbc32.lib odbccp32.lib WINMM.LIB ws2_32.lib"
 				GenerateDebugInformation="true"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
