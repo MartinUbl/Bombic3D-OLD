@@ -106,7 +106,7 @@ bool ParticleEmitter::Update(const clock_t diff)
         temp->pRec->z = temp->sz+(float(temp->actTime)/1000)*(float(speed)/1000)*sin(temp->hangle);
 
         //pokud castice urazila drahu jakou ma urazit, vymazeme ji
-        if (pythagoras_c(pythagoras_c(temp->pRec->x,temp->pRec->z),temp->pRec->y) > temp->destrange)
+        if (pythagoras_c(pythagoras_c(temp->pRec->x-temp->sx,temp->pRec->z-temp->sz),temp->pRec->y-temp->sy) > temp->destrange)
         {
             temp->pRec->remove = true;
             itr = Particles.erase(itr);

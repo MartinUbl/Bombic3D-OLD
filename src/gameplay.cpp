@@ -13,6 +13,14 @@ GamePlay::~GamePlay()
     //
 }
 
+//param1 = displaylist id 1
+//param2 = displaylist id 2
+void ClearBoom(uint32 param1, uint32 param2, uint32 param3)
+{
+    gDisplayStore.RemoveDisplayRecord(param1);
+    gDisplayStore.RemoveDisplayRecord(param2);
+}
+
 //param1 = ContentPosX
 //param2 = ContentPosZ
 //param3 = displaylist id
@@ -22,14 +30,23 @@ void Boom(uint32 param1, uint32 param2, uint32 param3)
 
     pos_x = float(param1-1)+0.5f;
     pos_z = float(param2-1)+0.5f;
-    //doprava
-    gEmitterMgr.AddEmitter(pos_x,2.0f,pos_z,0,0,0,0,-0.25f,-0.25f,0.25f,0.25f,3,0.3f,0.5f,3,6,1000,10000,50000,0,false,EMIT_FLAG_RANDOM_ROTATE);
-    //dozadu
-    gEmitterMgr.AddEmitter(pos_x,2.0f,pos_z,PI/2,0,0,0,-0.25f,-0.25f,0.25f,0.25f,3,0.3f,0.5f,3,6,1000,8000,2000,1,false,EMIT_FLAG_RANDOM_ROTATE);
-    //doleva
-    gEmitterMgr.AddEmitter(pos_x,2.0f,pos_z,PI,0,0,0,-0.25f,-0.25f,0.25f,0.25f,3,0.3f,0.5f,3,6,1000,8000,2000,1,false,EMIT_FLAG_RANDOM_ROTATE);
-    //dopredu
-    gEmitterMgr.AddEmitter(pos_x,2.0f,pos_z,3*PI/2,0,0,0,-0.25f,-0.25f,0.25f,0.25f,3,0.3f,0.5f,3,6,1000,8000,2000,1,false,EMIT_FLAG_RANDOM_ROTATE);
+
+    BillboardDisplayListRecord* pRec = NULL;
+    BillboardDisplayListRecord* pRec2 = NULL;
+    for (int i = 1; i < 5; i++)
+    {
+        // axis X
+        pRec  = gDisplay.DrawBillboard(pos_x+i,2.0f,pos_z,3,1,3,true);
+        pRec2 = gDisplay.DrawBillboard(pos_x-i,2.0f,pos_z,3,1,3,true);
+        if (pRec && pRec2)
+            gTimer.AddTimedEvent(2000,&ClearBoom,pRec->id,pRec2->id,0);
+
+        // axis Z
+        pRec  = gDisplay.DrawBillboard(pos_x,2.0f,pos_z+i,3,1,3,true);
+        pRec2 = gDisplay.DrawBillboard(pos_x,2.0f,pos_z-i,3,1,3,true);
+        if (pRec && pRec2)
+            gTimer.AddTimedEvent(2000,&ClearBoom,pRec->id,pRec2->id,0);
+    }
 
     gDisplayStore.RemoveDisplayRecord(param3);
 }
