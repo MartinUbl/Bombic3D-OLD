@@ -33,6 +33,11 @@ void Boom(uint32 param1, uint32 param2, uint32 param3)
 
     BillboardDisplayListRecord* pRec = NULL;
     BillboardDisplayListRecord* pRec2 = NULL;
+
+    pRec = gDisplay.DrawBillboard(pos_x,2.0f,pos_z,3,1,3,true);
+    if (pRec)
+        gTimer.AddTimedEvent(2000,&ClearBoom,pRec->id,0,0);
+
     for (int i = 1; i < 5; i++)
     {
         // axis X
