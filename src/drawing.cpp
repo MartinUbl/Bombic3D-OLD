@@ -563,6 +563,7 @@ void Display::DrawBillboards()
         }
         glTranslatef(temp->x*MAP_SCALE_X,temp->y*MAP_SCALE_Y,temp->z*MAP_SCALE_Z);
         glRotatef(90.0f+h_angle,0.0f,1.0f,0.0f);
+        glRotatef(180.0f-v_angle,0.0f,0.0f,1.0f);
 
         glBegin(GL_QUADS);
             glTexCoord2f(1.0f, 1.0f); glVertex3f(0*MAP_SCALE_X, temp->height*MAP_SCALE_Y, (-temp->width/2)*MAP_SCALE_Z);
