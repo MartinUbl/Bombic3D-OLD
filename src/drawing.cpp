@@ -705,7 +705,7 @@ unsigned short Display::CheckColision(float newx, float newy, float newz)
     {
         for (int j = lh_z; j <= pd_z; j++)
         {
-            if (actmap.field[i][j].type == TYPE_BOX)
+            if (actmap.field[i][j].type == TYPE_BOX || actmap.field[i][j].type == TYPE_SOLID_BOX)
             {
                 conx = (i-1)*MAP_SCALE_X;
                 conz = (j-1)*MAP_SCALE_Z;
