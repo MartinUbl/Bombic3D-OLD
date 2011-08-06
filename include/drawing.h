@@ -39,9 +39,10 @@ struct BillboardDisplayListRecord;
 //typy pole na mape
 enum FieldType
 {
-    TYPE_GROUND   = 0,
-    TYPE_BOX      = 1,
-    TYPE_STARTLOC = 2,
+    TYPE_GROUND    = 0,
+    TYPE_SOLID_BOX = 1,
+    TYPE_BOX       = 2,
+    TYPE_STARTLOC  = 3,
 };
 
 //kolize s osami
@@ -52,23 +53,27 @@ enum AxisColission
     AXIS_Z = 0x4
 };
 
-//Struktura reliefu mapy (vyskova mapa)
-struct MapRelief
+struct cell
 {
-    MapRelief()
+    uint16 type;
+    uint16 texture;
+};
+
+//Struktura reliefu mapy (vyskova mapa)
+struct Map
+{
+    Map()
     {
         MapId = -1;
-        Width = 0;
-        Height = 0;
-        for (int i = 0; i < 4*2; i++)
-            StartLoc[i] = 0;
+        field.resize(1);
+        field[0].resize(1);
+        mapname = "Unknown";
+        skybox = 0;
     }
     int MapId;
-    uint32 Width, Height;
-    uint32 DefaultTexture;
-    uint32 StartLoc[4*2]; //4 hraci, pro kazdeho 2 souradnice
-    GLfloat** Content;
-    GLfloat** ContentTextures;
+    std::vector<std::vector<cell>> field;
+    uint16 skybox; //NYI
+    std::string mapname;
 };
 
 //Hlavni trida zobrazeni
@@ -99,7 +104,7 @@ public:
     GLfloat GetViewZ() { return view_z; }
 
     //Manazer mapy
-    bool LoadMap(const char* HeightFile, const char* TextureMap);
+    bool LoadMap(const char* MapFilename);
     bool UnloadMap();
 
     //Kolize
@@ -140,7 +145,7 @@ public:
 protected:
     GLfloat h_angle, v_angle;
     GLfloat view_x,view_y,view_z;
-    MapRelief actmap; //relief aktualni mapy
+    Map actmap; //relief aktualni mapy
     uint32 LastTextureID;
 
     clock_t m_diff;

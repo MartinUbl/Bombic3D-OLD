@@ -25,11 +25,9 @@ Display::Display()
 void Display::Initialize()
 {
     //Docasne natvrdo zadane mapy, pozdeji nacteni podle aktualni pozice
-    char target_hmap[256];
-    char target_tmap[256];
-    sprintf(target_hmap,"%s/hmap1.txt",DATA_PATH);
-    sprintf(target_tmap,"%s/tmap1.txt",DATA_PATH);
-    if(LoadMap(target_hmap,target_tmap))
+    char loadmap[256];
+    sprintf(loadmap,"%s/001.bm",DATA_PATH);
+    if(LoadMap(loadmap))
     {
         actmap.MapId = 1; //TODO: priradit mapam ID
         gDisplayStore.FillCustomNeededData();
@@ -40,11 +38,11 @@ void Display::Initialize()
         InitModelDisplayList();
 
         //TEMP, inicializovat az se sitovou hrou
-        if (actmap.StartLoc[0] && actmap.StartLoc[1])
-        {
-            view_x = -(float(actmap.StartLoc[0]-1)*MAP_SCALE_X+0.15f);
-            view_z = -(float(actmap.StartLoc[1]-1)*MAP_SCALE_Z+0.15f);
-        }
+        //if (actmap.StartLoc[0] && actmap.StartLoc[1])
+        //{
+            view_x = -(float(1-1)*MAP_SCALE_X+0.15f);
+            view_z = -(float(1-1)*MAP_SCALE_Z+0.15f);
+        //}
     } else {
         MessageBox(hWnd,"Nepovedlo se naèíst mapu","Error",0);
         exit(0);
@@ -148,7 +146,7 @@ void Display::SetVAngle(float angle, bool relative)
 //Vraci aktualni vysku zapsanou v reliefu mapy
 float Display::GetViewHeight()
 {
-    return actmap.Content[int(fabs(view_x/MAP_SCALE_X))+1][int(fabs(view_z/MAP_SCALE_Z))+1]*MAP_SCALE_Y;
+    return actmap.field[int(fabs(view_x/MAP_SCALE_X))+1][int(fabs(view_z/MAP_SCALE_Z))+1].type*MAP_SCALE_Y;
 }
 
 //Vraci modifier na ose Z pro vyskovou mapu pri pohybu po nerovnem terenu
@@ -157,15 +155,15 @@ float Display::CalculateFloatZCoef()
     int ContentPosX = int(fabs((view_x)/MAP_SCALE_X))+1;
     int ContentPosZ = int(fabs((view_z)/MAP_SCALE_Z))+1;
 
-    if(ContentPosX+1 >= actmap.Width)
+    if(ContentPosX+1 >= actmap.field.size())
         ContentPosX -= 1;
 
-    if(ContentPosZ+1 >= actmap.Height)
+    if(ContentPosZ+1 >= actmap.field[0].size())
         ContentPosZ -= 1;
 
-    float TgValue = (fabs( actmap.Content[ContentPosX][ContentPosZ+1] - actmap.Content[ContentPosX][ContentPosZ] )*MAP_SCALE_Y) / (1.0f*MAP_SCALE_Z);
+    float TgValue = (abs( actmap.field[ContentPosX][ContentPosZ+1].type - actmap.field[ContentPosX][ContentPosZ].type )*MAP_SCALE_Y) / (1.0f*MAP_SCALE_Z);
 
-    if( actmap.Content[ContentPosX][ContentPosZ+1] > actmap.Content[ContentPosX][ContentPosZ] )
+    if( actmap.field[ContentPosX][ContentPosZ+1].type > actmap.field[ContentPosX][ContentPosZ].type )
         return ( TgValue ) * (fabs( (-view_z) - ((ContentPosZ-1)*MAP_SCALE_Z) ));
     else
         return -( TgValue ) * (fabs( (-view_z) - ((ContentPosZ-1)*MAP_SCALE_Z) ));
@@ -177,15 +175,15 @@ float Display::CalculateFloatXCoef()
     int ContentPosX = int(fabs((view_x)/MAP_SCALE_X))+1;
     int ContentPosZ = int(fabs((view_z)/MAP_SCALE_Z))+1;
 
-    if(ContentPosX+1 >= actmap.Width)
+    if(ContentPosX+1 >= actmap.field.size())
         ContentPosX -= 1;
 
-    if(ContentPosZ+1 >= actmap.Height)
+    if(ContentPosZ+1 >= actmap.field[0].size())
         ContentPosZ -= 1;
 
-    float TgValue = (fabs( actmap.Content[ContentPosX+1][ContentPosZ] - actmap.Content[ContentPosX][ContentPosZ] )*MAP_SCALE_Y) / (1.0f*MAP_SCALE_X);
+    float TgValue = (abs( actmap.field[ContentPosX+1][ContentPosZ].type - actmap.field[ContentPosX][ContentPosZ].type )*MAP_SCALE_Y) / (1.0f*MAP_SCALE_X);
 
-    if( actmap.Content[ContentPosX+1][ContentPosZ] > actmap.Content[ContentPosX][ContentPosZ] )
+    if( actmap.field[ContentPosX+1][ContentPosZ].type > actmap.field[ContentPosX][ContentPosZ].type )
         return ( TgValue ) * (fabs( (-view_x) - ((ContentPosX-1)*MAP_SCALE_X) ));
     else
         return -( TgValue ) * (fabs( (-view_x) - ((ContentPosX-1)*MAP_SCALE_X) ));
@@ -456,32 +454,32 @@ void Display::FlushModelDisplayList()
 void Display::BindMapDefaultTexture()
 {
     //Nabindovani defaultni textury
-    LastTextureID = actmap.DefaultTexture;
-    glBindTexture(GL_TEXTURE_2D, gDisplayStore.FloorTextures[actmap.DefaultTexture]);
+    LastTextureID = 0;
+    glBindTexture(GL_TEXTURE_2D, gDisplayStore.FloorTextures[0]);
 }
 
 void Display::DrawMap()
 {
     //Vykresleni mapy
-    for(int i=0;i<(uint32)actmap.Width;++i)
+    for(int i=0;i<(uint32)actmap.field.size();++i)
     {
-        for(int j=0;j<(uint32)actmap.Height;++j)
+        for(int j=0;j<(uint32)actmap.field[0].size();++j)
         {
             //Pokud se zmenila textura
-            if(actmap.ContentTextures[i][j] != LastTextureID)
+            if(actmap.field[i][j].texture != LastTextureID)
             {
                 //A pokud je textura nactena v pameti
-                if(gDataStore.TextureData[(uint32)actmap.ContentTextures[i][j]].loaded = true)
+                if(gDataStore.TextureData[(uint32)actmap.field[i][j].texture].loaded = true)
                 {
                     //Nabindovat
-                    LastTextureID = (uint32)actmap.ContentTextures[i][j];
-                    glBindTexture(GL_TEXTURE_2D, gDisplayStore.FloorTextures[(uint32)actmap.ContentTextures[i][j]]);
+                    LastTextureID = (uint32)actmap.field[i][j].texture;
+                    glBindTexture(GL_TEXTURE_2D, gDisplayStore.FloorTextures[(uint32)actmap.field[i][j].texture]);
                 }
             }
             //Prevedeni pro lepsi orientaci
             GLfloat px = (GLfloat)i;
             GLfloat py = (GLfloat)j;
-            if (actmap.Content[i][j] == TYPE_GROUND || actmap.Content[i][j] == TYPE_STARTLOC)
+            if (actmap.field[i][j].type == TYPE_GROUND || actmap.field[i][j].type == TYPE_STARTLOC)
             {
                 glBegin(GL_POLYGON);
                     glNormal3f(0.0f,-1.0f, 0.0f);
@@ -491,7 +489,7 @@ void Display::DrawMap()
                     glTexCoord2f(1.0f, 0.0f); glVertex3f((px-1)*MAP_SCALE_X, 0*MAP_SCALE_Y, (py  )*MAP_SCALE_Z);
                 glEnd();
             }
-            else if (actmap.Content[i][j] == TYPE_BOX)
+            else if (actmap.field[i][j].type == TYPE_SOLID_BOX)
             {
                 glBegin(GL_QUADS);
                     glNormal3f(0.0f,-1.0f, 0.0f);
@@ -665,9 +663,9 @@ unsigned short Display::CheckColision(float newx, float newy, float newz)
     int ContentPosXO = int(fabs((view_x)/MAP_SCALE_X))+1;
     int ContentPosZO = int(fabs((view_z)/MAP_SCALE_Z))+1;
 
-    if(ContentPosX+1 >= actmap.Width)
+    if(ContentPosX+1 >= actmap.field.size())
         colision |= AXIS_X;
-    if(ContentPosZ+1 >= actmap.Height)
+    if(ContentPosZ+1 >= actmap.field[0].size())
         colision |= AXIS_Z;
 
     if(ContentPosX <= 0)
@@ -688,10 +686,10 @@ unsigned short Display::CheckColision(float newx, float newy, float newz)
         lh_x = 0;
     if (lh_z < 0)
         lh_z = 0;
-    if (pd_x > actmap.Width-1)
-        pd_x = actmap.Width-1;
-    if (pd_z > actmap.Height-1)
-        pd_z = actmap.Height-1;
+    if (pd_x > actmap.field.size()-1)
+        pd_x = actmap.field.size()-1;
+    if (pd_z > actmap.field[0].size()-1)
+        pd_z = actmap.field[0].size()-1;
 
     float ncx = fabs(newx);
     float ncz = fabs(newz);
@@ -706,7 +704,7 @@ unsigned short Display::CheckColision(float newx, float newy, float newz)
     {
         for (int j = lh_z; j <= pd_z; j++)
         {
-            if (actmap.Content[i][j] == TYPE_BOX)
+            if (actmap.field[i][j].type == TYPE_BOX)
             {
                 conx = (i-1)*MAP_SCALE_X;
                 conz = (j-1)*MAP_SCALE_Z;

@@ -1,20 +1,16 @@
 #include <game_inc.h>
 
-#define CHAR_MOVER 48 //posun v ASCII rade (protoze 0 je 48 => 48-48 do heightmap)
-
 bool Display::UnloadMap()
 {
     //Uz byla uvolnena
     if(actmap.MapId < 0)
         return false;
 
-    for (int i = 0; i < actmap.Width; i++)
+    for (int i = 0; i < actmap.field.size(); i++)
     {
-        free((void*)*(actmap.Content + i));
-        free((void*)*(actmap.ContentTextures + i));
+        actmap.field[i].clear();
     }
-    free((void*)actmap.Content);
-    free((void*)actmap.ContentTextures);
+    actmap.field.clear();
 
     //Uvolneni textur z pameti
     gDisplayStore.FloorTextures.clear();
@@ -28,12 +24,21 @@ bool Display::UnloadMap()
     return true;
 }
 
-//Nacte mapu ze souboru
-bool Display::LoadMap(const char* HeightFile, const char* TextureMap)
+// Vychozi chunk z mapy
+struct Chunk
 {
-    FILE* hmap = fopen(HeightFile,"r");
+    uint32 x;
+    uint32 y;
+    uint16 type;
+    uint16 texture;
+};
 
-    if(!hmap)
+//Nacte mapu ze souboru
+bool Display::LoadMap(const char* MapFilename)
+{
+    FILE* map = fopen(MapFilename,"r");
+
+    if(!map)
         return false;
 
     gDisplayStore.NeededFloorTextures.clear();
@@ -48,115 +53,38 @@ bool Display::LoadMap(const char* HeightFile, const char* TextureMap)
     //Pote se odstrani tyto radky, a do listu potrebnych modelu se budou tlacit jen
     //modely, co jsou potrebne
 
-    int c,sloupec,radka,sloupcu,radek,buffer;
+    uint32 namesize = 0;
+    fread(&namesize,4,1,map);
+    char* mapname = new char[namesize+1];
+    fread(mapname,1,namesize,map);
+    mapname[namesize] = 0;
+    actmap.mapname = mapname;
+    fread(&actmap.skybox,2,1,map);
 
-    sloupec = 0;
-    radka = 0;
-    sloupcu = 0;
-    radek = 0;
-    buffer = 0;
-    int DefTexture = 0;
-    char HeaderData[64];
+    Chunk* pChunk = new Chunk;
 
-    ////
-    //Zjisteni poctu radku a sloupcu
-    if(!fgets(HeaderData, 64, hmap))
-        sscanf(HeaderData,"%i",&DefTexture);
+    //field 1x1, will be resized
+    actmap.field.resize(1);
+    actmap.field[0].resize(1);
 
-    do
+    while(fread(pChunk,sizeof(Chunk),1,map) > 0)
     {
-        c = fgetc(hmap);
-        if(c == '\n')
-            ++radek;
-        if(radek < 1)
-            ++sloupcu;
-    } while (c != EOF);
-    ////
+        if (pChunk->x > actmap.field.size()-1)
+        {
+            actmap.field.resize(pChunk->x+1);
+            actmap.field[actmap.field.size()-1].resize(actmap.field[0].size());
+        }
+        if (pChunk->y > actmap.field[0].size()-1)
+        {
+            for (uint32 i = 0; i < actmap.field.size(); i++)
+                actmap.field[i].resize(pChunk->y+1);
+        }
+        actmap.field[pChunk->x][pChunk->y].type = pChunk->type;
+        actmap.field[pChunk->x][pChunk->y].texture = pChunk->texture;
 
-    fclose(hmap);
-    hmap = NULL;
-    hmap = fopen(HeightFile,"r");
-
-    if(!fgets(HeaderData, 64, hmap))
-        sscanf(HeaderData,"%i",&DefTexture);
-
-    gDisplayStore.NeededFloorTextures.push_back(DefTexture);
-    actmap.DefaultTexture = DefTexture;
-
-    // Alokace pameti pro potrebny pocet radku a sloupcu (dalo by se delat za behu pomoci realloc)
-    actmap.Content = (GLfloat**)malloc((sloupcu+1)*sizeof(GLfloat*));
-    actmap.ContentTextures = (GLfloat**)malloc((sloupcu+1)*sizeof(GLfloat*));
-    for(int i = 0; i < (sloupcu+1); i++)
-    {
-        actmap.Content[i] = (GLfloat*)malloc((radek+1)*sizeof(GLfloat));
-        actmap.ContentTextures[i] = (GLfloat*)malloc((radek+1)*sizeof(GLfloat));
+        if (!gDisplayStore.IsAlreadyNeededTexture(pChunk->texture))
+            gDisplayStore.NeededFloorTextures.push_back(pChunk->texture);
     }
-
-    uint32 startlocpos = 0;
-
-    //Nacteni dat do pole v actmap
-    do
-    {
-        c = fgetc(hmap);
-        if (c != '\n')
-        {
-            c = c - CHAR_MOVER;
-            if (c >= 0 && c <= 9)
-            {
-                actmap.Content[sloupec][radka] = (GLfloat)c;
-                if (c==2)
-                {
-                    actmap.StartLoc[startlocpos] = sloupec;
-                    actmap.StartLoc[startlocpos+1] = radka;
-                    startlocpos += 2;
-                }
-            }
-            sloupec++;
-        }
-        if (c == '\n' || sloupec > sloupcu)
-        {
-            sloupec = 0;
-            radka++;
-        }
-        if (radka > radek)
-            break;
-    } while (c != EOF);
-
-    actmap.Width = sloupcu;
-    actmap.Height = radka;
-
-    fclose(hmap);
-    FILE* tmap = fopen(TextureMap,"r");
-
-    radka = 0;
-    sloupec = 0;
-
-    if(!tmap)
-        return false;
-
-    //Nacteni texturove mapy do pole v actmap
-    do
-    {
-        c = fgetc(tmap);
-        if (c != '\n')
-        {
-            c = c - CHAR_MOVER;
-            if (c >= 0 && c <= 9)
-            {
-                actmap.ContentTextures[sloupec][radka] = (GLfloat)c;
-                if (c != DefTexture && !gDisplayStore.IsAlreadyNeededTexture(c))
-                    gDisplayStore.NeededFloorTextures.push_back(c);
-            }
-            sloupec++;
-        }
-        if (c == '\n' || sloupec > sloupcu)
-        {
-            sloupec = 0;
-            radka++;
-        }
-        if (radka > radek)
-            break;
-    } while (c != EOF);
 
     return true;
 }
