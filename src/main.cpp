@@ -20,7 +20,7 @@ TSettings gConfig;
 bool ExtLog(int i)
 {
     HWND handle = FindWindow(NULL,TEXT("Logger"));
-    if(handle)
+    if (handle)
     {
         SendMessage(handle,WM_USER+5,1,i);
         return true;
@@ -32,27 +32,33 @@ bool ExtLog(int i)
 }
 
 //pomocna funkce pro zjisteni typu souboru podle pripony
-vector<string> explode(const string& str, const char& ch) {
+vector<string> explode(const string& str, const char& ch)
+{
     string next = "";
     vector<string> result;
 
     // For each character in the string
-    for (string::const_iterator it = str.begin(); it != str.end(); it++) {
+    for (string::const_iterator it = str.begin(); it != str.end(); it++)
+    {
         // If we've hit the terminal character
-        if (*it == ch) {
-                // If we have some characters accumulated
-                if (next.length() > 0) {
-                        // Add them to the result vector
-                        result.push_back(next);
-                        next = "";
-                }
-        } else {
-                // Accumulate the next character into the sequence
-                next += *it;
+        if (*it == ch)
+        {
+            // If we have some characters accumulated
+            if (next.length() > 0)
+            {
+                // Add them to the result vector
+                result.push_back(next);
+                next = "";
+            }
+        }
+        else
+        {
+            // Accumulate the next character into the sequence
+            next += *it;
         }
     }
 
-    if(next.length() > 0)
+    if (next.length() > 0)
         result.push_back(next);
 
     return result;
@@ -61,30 +67,30 @@ vector<string> explode(const string& str, const char& ch) {
 //Vytvoreni fontu
 GLvoid BuildFont(GLvoid)                                // Build Our Bitmap Font
 {
-    HFONT    font;                                        // Windows Font ID
-    HFONT    oldfont;                                    // Used For Good House Keeping
+    HFONT    font;                                      // Windows Font ID
+    HFONT    oldfont;                                   // Used For Good House Keeping
 
-    base = glGenLists(96);                                // Storage For 96 Characters
+    base = glGenLists(96);                              // Storage For 96 Characters
 
-    font = CreateFont(    -24,                            // Height Of Font
-                        0,                                // Width Of Font
-                        0,                                // Angle Of Escapement
-                        0,                                // Orientation Angle
+    font = CreateFont(  -24,                            // Height Of Font
+                        0,                              // Width Of Font
+                        0,                              // Angle Of Escapement
+                        0,                              // Orientation Angle
                         FW_BOLD,                        // Font Weight
-                        FALSE,                            // Italic
-                        FALSE,                            // Underline
-                        FALSE,                            // Strikeout
-                        ANSI_CHARSET,                    // Character Set Identifier
-                        OUT_TT_PRECIS,                    // Output Precision
+                        FALSE,                          // Italic
+                        FALSE,                          // Underline
+                        FALSE,                          // Strikeout
+                        ANSI_CHARSET,                   // Character Set Identifier
+                        OUT_TT_PRECIS,                  // Output Precision
                         CLIP_DEFAULT_PRECIS,            // Clipping Precision
                         ANTIALIASED_QUALITY,            // Output Quality
-                        FF_DONTCARE|DEFAULT_PITCH,        // Family And Pitch
-                        "Courier New");                    // Font Name
+                        FF_DONTCARE|DEFAULT_PITCH,      // Family And Pitch
+                        "Courier New");                 // Font Name
 
     oldfont = (HFONT)SelectObject(hDC, font);           // Selects The Font We Want
-    wglUseFontBitmaps(hDC, 32, 96, base);                // Builds 96 Characters Starting At Character 32
-    SelectObject(hDC, oldfont);                            // Selects The Font We Want
-    DeleteObject(font);                                    // Delete The Font
+    wglUseFontBitmaps(hDC, 32, 96, base);               // Builds 96 Characters Starting At Character 32
+    SelectObject(hDC, oldfont);                         // Selects The Font We Want
+    DeleteObject(font);                                 // Delete The Font
 }
 
 GLvoid KillFont(GLvoid)
@@ -95,27 +101,27 @@ GLvoid KillFont(GLvoid)
 //Vykresleni textu
 GLvoid glPrint(const char *fmt, ...)                    // Custom GL "Print" Routine
 {
-    char        text[256];                                // Holds Our String
-    va_list        ap;                                        // Pointer To List Of Arguments
+    char    text[256];                                  // Holds Our String
+    va_list ap;                                         // Pointer To List Of Arguments
 
     if (fmt == NULL)                                    // If There's No Text
-        return;                                            // Do Nothing
+        return;                                         // Do Nothing
 
-    va_start(ap, fmt);                                    // Parses The String For Variables
-        vsprintf(text, fmt, ap);                        // And Converts Symbols To Actual Numbers
-    va_end(ap);                                            // Results Are Stored In Text
+    va_start(ap, fmt);                                  // Parses The String For Variables
+      vsprintf(text, fmt, ap);                          // And Converts Symbols To Actual Numbers
+    va_end(ap);                                         // Results Are Stored In Text
 
-    glPushAttrib(GL_LIST_BIT);                            // Pushes The Display List Bits
-    glListBase(base - 32);                                // Sets The Base Character to 32
-    glCallLists(strlen(text), GL_UNSIGNED_BYTE, text);    // Draws The Display List Text
-    glPopAttrib();                                        // Pops The Display List Bits
+    glPushAttrib(GL_LIST_BIT);                          // Pushes The Display List Bits
+    glListBase(base - 32);                              // Sets The Base Character to 32
+    glCallLists(strlen(text), GL_UNSIGNED_BYTE, text);  // Draws The Display List Text
+    glPopAttrib();                                      // Pops The Display List Bits
 }
 
 //Cteni jedne radky ze souboru, helper funkce
 bool readstr(FILE *f, char *string)
 {
     fgets(string, 255, f);
-    if((string[0] == '/') || (string[0] == '\n')) return false;
+    if ((string[0] == '/') || (string[0] == '\n')) return false;
     return true;
 }
 
@@ -148,7 +154,7 @@ void LoadConfig()
     FILE* config = fopen(dest,"r");
 
     //Pokud neexistuje, zkusit nacist defaultni config (nemenny, dodavany autory)
-    if(!config)
+    if (!config)
     {
         sprintf(dest,"%s/default_global.set",SETTINGS_PATH);
         config = fopen(dest,"r");
@@ -162,7 +168,7 @@ void LoadConfig()
     gConfig.RefreshRate  = 60;
 
     //A pokud se nenacetl soubor configu, opustit
-    if(!config)
+    if (!config)
         return;
 
     //Nejake pracovni promenne
@@ -172,10 +178,10 @@ void LoadConfig()
     unsigned int i,j;
     locale loc;
 
-    while(fgets(dest, 200, config))
+    while (fgets(dest, 200, config))
     {
         i = 0;
-        while(dest[i] != '=' && dest[i] != '\n')
+        while (dest[i] != '=' && dest[i] != '\n')
         {
             setting[i] = dest[i];
             i++;
@@ -183,7 +189,7 @@ void LoadConfig()
         setting[i] = '\0';
         i++;
         j = 0;
-        while(dest[i] != '\n')
+        while (dest[i] != '\n')
         {
             value[j] = dest[i];
             i++; j++;
@@ -191,28 +197,28 @@ void LoadConfig()
         value[j] = '\0';
         
         //Rozpoznani nastaveni
-        for(int k = 0; k < strlen(setting); k++)
+        for (int k = 0; k < strlen(setting); k++)
             setting[k] = std::toupper(setting[k],loc);
 
         ivalue = atoi(value);
 
-        if(strcmp(setting,"WINDOW_WIDTH") == 0)
-            if(ivalue > 0)
+        if (strcmp(setting,"WINDOW_WIDTH") == 0)
+            if (ivalue > 0)
                 gConfig.WindowWidth = ivalue;
 
-        if(strcmp(setting,"WINDOW_HEIGHT") == 0)
-            if(ivalue > 0)
+        if (strcmp(setting,"WINDOW_HEIGHT") == 0)
+            if (ivalue > 0)
                 gConfig.WindowHeight = ivalue;
 
-        if(strcmp(setting,"COLOR_DEPTH") == 0)
-            if(ivalue > 0)
+        if (strcmp(setting,"COLOR_DEPTH") == 0)
+            if (ivalue > 0)
                 gConfig.ColorDepth = ivalue;
 
-        if(strcmp(setting,"FULLSCREEN") == 0)
+        if (strcmp(setting,"FULLSCREEN") == 0)
             gConfig.fullscreen = ivalue?true:false;
 
-        if(strcmp(setting,"REFRESH_RATE") == 0)
-            if(ivalue > 0)
+        if (strcmp(setting,"REFRESH_RATE") == 0)
+            if (ivalue > 0)
                 gConfig.RefreshRate = ivalue;
     }
 }
@@ -272,39 +278,39 @@ int DrawGLScene(GLvoid)
 
 GLvoid KillGLWindow(GLvoid)
 {
-    if(fullscreen)
+    if (fullscreen)
     {
         ChangeDisplaySettings(NULL,0);
         ShowCursor(TRUE);
     }
 
-    if(hRC)
+    if (hRC)
     {
-        if(!wglMakeCurrent(NULL,NULL))
+        if (!wglMakeCurrent(NULL,NULL))
         {
             MessageBox(NULL,"Release Of DC And RC Failed.","SHUTDOWN ERROR",MB_OK | MB_ICONINFORMATION);
         }
 
-        if(!wglDeleteContext(hRC))
+        if (!wglDeleteContext(hRC))
         {
             MessageBox(NULL,"Release Rendering Context Failed.","SHUTDOWN ERROR",MB_OK | MB_ICONINFORMATION);
         }
         hRC = NULL;
     }
 
-    if(hDC && !ReleaseDC(hWnd,hDC))
+    if (hDC && !ReleaseDC(hWnd,hDC))
     {
         MessageBox(NULL,"Release Device Context Failed.","SHUTDOWN ERROR",MB_OK | MB_ICONINFORMATION);
         hDC = NULL;
     }
 
-    if(hWnd && !DestroyWindow(hWnd))
+    if (hWnd && !DestroyWindow(hWnd))
     {
         MessageBox(NULL,"Could Not Release hWnd.","SHUTDOWN ERROR",MB_OK | MB_ICONINFORMATION);
         hWnd = NULL;
     }
 
-    if(!UnregisterClass("OpenGL",hInstance))
+    if (!UnregisterClass("OpenGL",hInstance))
     {
         MessageBox(NULL,"Could Not Unregister Class.","SHUTDOWN ERROR",MB_OK | MB_ICONINFORMATION);
         hInstance = NULL;
@@ -318,45 +324,45 @@ BOOL CreateGLWindow(char* title, int width, int height, int bits, bool fullscree
     DWORD dwExStyle;
     DWORD dwStyle;
     RECT WindowRect;
-    WindowRect.left = (long)0;
-    WindowRect.right = (long)width;
-    WindowRect.top = (long)0;
+    WindowRect.left   = (long)0;
+    WindowRect.right  = (long)width;
+    WindowRect.top    = (long)0;
     WindowRect.bottom = (long)height;
 
     fullscreen = fullscreenflag;
 
-    hInstance            = GetModuleHandle(NULL);
-    wc.style            = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
-    wc.lpfnWndProc        = (WNDPROC) WndProc;
-    wc.cbClsExtra        = 0;
-    wc.cbWndExtra        = 0;
-    wc.hInstance        = hInstance;
-    wc.hIcon            = LoadIcon(NULL, IDI_WINLOGO);
-    wc.hCursor            = LoadCursor(NULL, IDC_ARROW);
-    wc.hbrBackground    = NULL;
-    wc.lpszMenuName        = NULL;
-    wc.lpszClassName    = "OpenGL";
+    hInstance          = GetModuleHandle(NULL);
+    wc.style           = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
+    wc.lpfnWndProc     = (WNDPROC) WndProc;
+    wc.cbClsExtra      = 0;
+    wc.cbWndExtra      = 0;
+    wc.hInstance       = hInstance;
+    wc.hIcon           = LoadIcon(NULL, IDI_WINLOGO);
+    wc.hCursor         = LoadCursor(NULL, IDC_ARROW);
+    wc.hbrBackground   = NULL;
+    wc.lpszMenuName    = NULL;
+    wc.lpszClassName   = "OpenGL";
 
-    if(!RegisterClass(&wc))
+    if (!RegisterClass(&wc))
     {
         MessageBox(NULL,"Failed To Register The Window Class.","ERROR",MB_OK|MB_ICONEXCLAMATION);
         return FALSE;
     }
 
-    if(fullscreen)
+    if (fullscreen)
     {
         DEVMODE dmScreenSettings;
         memset(&dmScreenSettings,0,sizeof(dmScreenSettings));
-        dmScreenSettings.dmSize=sizeof(dmScreenSettings);
-        dmScreenSettings.dmPelsWidth    = width;
-        dmScreenSettings.dmPelsHeight    = height;
-        dmScreenSettings.dmBitsPerPel    = bits;
-        dmScreenSettings.dmFields=DM_BITSPERPEL|DM_PELSWIDTH|DM_PELSHEIGHT;
+        dmScreenSettings.dmSize       = sizeof(dmScreenSettings);
+        dmScreenSettings.dmPelsWidth  = width;
+        dmScreenSettings.dmPelsHeight = height;
+        dmScreenSettings.dmBitsPerPel = bits;
+        dmScreenSettings.dmFields     = DM_BITSPERPEL|DM_PELSWIDTH|DM_PELSHEIGHT;
         dmScreenSettings.dmDisplayFrequency = refreshrate;
 
-        if(ChangeDisplaySettings(&dmScreenSettings,CDS_FULLSCREEN)!=DISP_CHANGE_SUCCESSFUL)
+        if (ChangeDisplaySettings(&dmScreenSettings,CDS_FULLSCREEN)!= DISP_CHANGE_SUCCESSFUL)
         {
-            if(MessageBox(NULL,"The Requested Fullscreen Mode Is Not Supported By\nYour Video Card. Use Windowed Mode Instead?","ERROR",MB_YESNO|MB_ICONEXCLAMATION)==IDYES)
+            if (MessageBox(NULL,"The Requested Fullscreen Mode Is Not Supported By\nYour Video Card. Use Windowed Mode Instead?","ERROR",MB_YESNO|MB_ICONEXCLAMATION)==IDYES)
             {
                 fullscreen = FALSE;
             }
@@ -368,7 +374,7 @@ BOOL CreateGLWindow(char* title, int width, int height, int bits, bool fullscree
         }
     }
 
-    if(fullscreen)
+    if (fullscreen)
     {
         dwExStyle = WS_EX_APPWINDOW;
         dwStyle = WS_POPUP;
@@ -423,35 +429,35 @@ BOOL CreateGLWindow(char* title, int width, int height, int bits, bool fullscree
         0, 0, 0
     };
 
-    if(!(hDC = GetDC(hWnd)))
+    if (!(hDC = GetDC(hWnd)))
     {
         KillGLWindow();
         MessageBox(NULL,"Can't Create A GL Device Context.","ERROR",MB_OK|MB_ICONEXCLAMATION);
         return FALSE;
     }
 
-    if(!(PixelFormat = ChoosePixelFormat(hDC,&pfd)))
+    if (!(PixelFormat = ChoosePixelFormat(hDC,&pfd)))
     {
         KillGLWindow();
         MessageBox(NULL,"Can't Find A Suitable PixelFormat.","ERROR",MB_OK|MB_ICONEXCLAMATION);
         return FALSE;
     }
 
-    if(!SetPixelFormat(hDC,PixelFormat,&pfd))
+    if (!SetPixelFormat(hDC,PixelFormat,&pfd))
     {
         KillGLWindow();
         MessageBox(NULL,"Can't Set The PixelFormat.","ERROR",MB_OK|MB_ICONEXCLAMATION);
         return FALSE;
     }
 
-    if(!(hRC = wglCreateContext(hDC)))
+    if (!(hRC = wglCreateContext(hDC)))
     {
         KillGLWindow();
         MessageBox(NULL,"Can't Create A GL Rendering Context.","ERROR",MB_OK|MB_ICONEXCLAMATION);
         return FALSE;
     }
 
-    if(!wglMakeCurrent(hDC,hRC))
+    if (!wglMakeCurrent(hDC,hRC))
     {
         KillGLWindow();
         MessageBox(NULL,"Can't Activate The GL Rendering Context.","ERROR",MB_OK|MB_ICONEXCLAMATION);
@@ -463,7 +469,7 @@ BOOL CreateGLWindow(char* title, int width, int height, int bits, bool fullscree
     SetFocus(hWnd);
     ReSizeGLScene(width, height);
 
-    if(!InitGL())
+    if (!InitGL())
     {
         KillGLWindow();
         MessageBox(NULL,"Initialization Failed.","ERROR",MB_OK|MB_ICONEXCLAMATION);
@@ -473,10 +479,10 @@ BOOL CreateGLWindow(char* title, int width, int height, int bits, bool fullscree
     return TRUE;
 }
 
-LRESULT CALLBACK WndProc(    HWND    hWnd,
+LRESULT CALLBACK WndProc(   HWND    hWnd,
                             UINT    uMsg,
-                            WPARAM    wParam,
-                            LPARAM    lParam)
+                            WPARAM  wParam,
+                            LPARAM  lParam)
 {
     switch (uMsg)
     {
@@ -571,10 +577,10 @@ LRESULT CALLBACK WndProc(    HWND    hWnd,
     return DefWindowProc(hWnd,uMsg,wParam,lParam);
 }
 
-int WINAPI WinMain(    HINSTANCE    hInstance,
+int WINAPI WinMain( HINSTANCE    hInstance,
                     HINSTANCE    hPrevInstance,
                     LPSTR        lpCmdLine,
-                    int            nCmdShow)
+                    int          nCmdShow)
 {
     MSG msg;
     BOOL done = FALSE;
@@ -583,7 +589,7 @@ int WINAPI WinMain(    HINSTANCE    hInstance,
 
     srand ( (unsigned int)time(NULL) );
 
-    if(!CreateGLWindow("Bomberman 3D",gConfig.WindowWidth,gConfig.WindowHeight,gConfig.ColorDepth,gConfig.fullscreen,gConfig.RefreshRate))
+    if (!CreateGLWindow("Bomberman 3D",gConfig.WindowWidth,gConfig.WindowHeight,gConfig.ColorDepth,gConfig.fullscreen,gConfig.RefreshRate))
     {
         return 0;
     }
@@ -591,9 +597,9 @@ int WINAPI WinMain(    HINSTANCE    hInstance,
     // TODO: our own cursor
     ShowCursor(true);
 
-    while(!done)
+    while (!done)
     {
-        if(PeekMessage(&msg,NULL,0,0,PM_REMOVE))
+        if (PeekMessage(&msg,NULL,0,0,PM_REMOVE))
         {
             if (msg.message==WM_QUIT)
             {
@@ -614,7 +620,7 @@ int WINAPI WinMain(    HINSTANCE    hInstance,
             //{
             //}
 
-            if((active && !DrawGLScene()) || gInterface.IsKeyPressed(VK_ESCAPE))
+            if ((active && !DrawGLScene()) || gInterface.IsKeyPressed(VK_ESCAPE))
             {
                 done=TRUE;
             }
@@ -631,4 +637,3 @@ int WINAPI WinMain(    HINSTANCE    hInstance,
     KillFont();
     return (msg.wParam);
 }
-
