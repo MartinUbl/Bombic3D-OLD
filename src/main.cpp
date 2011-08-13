@@ -159,6 +159,7 @@ void LoadConfig()
     gConfig.WindowHeight = DEF_WINDOW_HEIGHT;
     gConfig.ColorDepth   = DEF_COLOR_DEPTH;
     gConfig.fullscreen   = false;
+    gConfig.RefreshRate  = 60;
 
     //A pokud se nenacetl soubor configu, opustit
     if(!config)
@@ -194,7 +195,7 @@ void LoadConfig()
             setting[k] = std::toupper(setting[k],loc);
 
         ivalue = atoi(value);
-        
+
         if(strcmp(setting,"WINDOW_WIDTH") == 0)
             if(ivalue > 0)
                 gConfig.WindowWidth = ivalue;
@@ -209,6 +210,10 @@ void LoadConfig()
 
         if(strcmp(setting,"FULLSCREEN") == 0)
             gConfig.fullscreen = ivalue?true:false;
+
+        if(strcmp(setting,"REFRESH_RATE") == 0)
+            if(ivalue > 0)
+                gConfig.RefreshRate = ivalue;
     }
 }
 
@@ -306,7 +311,7 @@ GLvoid KillGLWindow(GLvoid)
     }
 }
  
-BOOL CreateGLWindow(char* title, int width, int height, int bits, bool fullscreenflag)
+BOOL CreateGLWindow(char* title, int width, int height, int bits, bool fullscreenflag, int refreshrate)
 {
     GLuint PixelFormat;
     WNDCLASS wc;
@@ -347,6 +352,7 @@ BOOL CreateGLWindow(char* title, int width, int height, int bits, bool fullscree
         dmScreenSettings.dmPelsHeight    = height;
         dmScreenSettings.dmBitsPerPel    = bits;
         dmScreenSettings.dmFields=DM_BITSPERPEL|DM_PELSWIDTH|DM_PELSHEIGHT;
+        dmScreenSettings.dmDisplayFrequency = refreshrate;
 
         if(ChangeDisplaySettings(&dmScreenSettings,CDS_FULLSCREEN)!=DISP_CHANGE_SUCCESSFUL)
         {
@@ -577,7 +583,7 @@ int WINAPI WinMain(    HINSTANCE    hInstance,
 
     srand ( (unsigned int)time(NULL) );
 
-    if(!CreateGLWindow("Bomberman 3D",gConfig.WindowWidth,gConfig.WindowHeight,gConfig.ColorDepth,gConfig.fullscreen))
+    if(!CreateGLWindow("Bomberman 3D",gConfig.WindowWidth,gConfig.WindowHeight,gConfig.ColorDepth,gConfig.fullscreen,gConfig.RefreshRate))
     {
         return 0;
     }

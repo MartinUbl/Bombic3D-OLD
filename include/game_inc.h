@@ -82,6 +82,7 @@ struct TSettings
     unsigned int WindowHeight;
     unsigned char ColorDepth;
     bool fullscreen;
+    unsigned int RefreshRate;
 };
 
 extern TSettings gConfig;
