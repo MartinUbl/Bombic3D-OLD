@@ -9,9 +9,6 @@ HINSTANCE hInstance;
 bool active=TRUE;
 bool fullscreen=TRUE;
 
-//docasne, test
-GLfloat LightAmbient[]= { 1.0f, 1.0f, 1.0f, 1.0f };
-
 GLYPHMETRICSFLOAT gmf[256]; //buffer pro font
 GLuint base;
 
@@ -241,11 +238,6 @@ int InitGL(GLvoid)
     glEnable(GL_POINT_SMOOTH);
     glEnable(GL_LINE_SMOOTH);
     glEnable(GL_COLOR_MATERIAL);
-
-    //Osvetleni, bude jeste prepracovano
-    glLightfv(GL_LIGHT1, GL_AMBIENT, LightAmbient);
-    glEnable(GL_LIGHT1);
-    glEnable(GL_LIGHTING);
 
     //Nacteni fontu
     BuildFont();

@@ -128,13 +128,19 @@ void Display::DrawGame()
     //Player Model posun a rotace
     UpdatePlayerModelPosition();
 
-    //Bodove svetlo, po dodelani prostredi vymazat!
+    // Svetlo
+    glEnable(GL_LIGHTING);
+    glEnable(GL_NORMALIZE);
+
     GLfloat AmbientLightParam[] = {0.9f,0.9f,0.9f,1.0f};
-    GLfloat DiffuseLightParam[] = {0.2f,0.2f,0.2f,0.1f};
-    GLfloat DiffuseLightPos[]   = {-view_x+MODPOS_X,view_y,-view_z+MODPOS_X,1.0f};
+    GLfloat DiffuseLightParam[] = {0.8f,0.8f,0.8f,1.0f};
+    GLfloat SpecularLightParam[] = {0.8f, 0.8f, 0.8f, 1.0f};
+    GLfloat DiffuseLightPos[]   = {-view_x, 5.0f, -view_z, 0.5f};
     glLightfv(GL_LIGHT1, GL_AMBIENT, AmbientLightParam);
     glLightfv(GL_LIGHT1, GL_DIFFUSE, DiffuseLightParam);
+    glLightfv(GL_LIGHT1, GL_SPECULAR, SpecularLightParam);
     glLightfv(GL_LIGHT1, GL_POSITION,DiffuseLightPos);
+    glEnable(GL_LIGHT1);
 
     //Povoleni mapovani textur
     glEnable(GL_TEXTURE_2D);
@@ -160,6 +166,11 @@ void Display::DrawGame()
     DrawTexts();
 
     glTranslatef(+MODPOS_X,0,+MODPOS_Z);
+
+    // Cleanup
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_LIGHTING);
+    glDisable(GL_LIGHT1);
 
     FlushTextDisplayList();
 }
