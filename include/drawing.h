@@ -36,6 +36,17 @@
 struct ModelDisplayListRecord;
 struct BillboardDisplayListRecord;
 
+//faze hry
+enum GameState
+{
+    GAME_NONE = 0,
+    GAME_INTRO,
+    GAME_MENU,
+    GAME_LOADING,
+    GAME_GAME,
+    GAME_EXITING,
+};
+
 //typy pole na mape
 enum FieldType
 {
@@ -86,6 +97,8 @@ public:
     float CalculateFloatXCoef();
     void Initialize();
     void DoTick();
+    void DrawMenu();
+    void DrawGame();
     void SetHAngle(float angle, bool relative = false);
     void SetVAngle(float angle, bool relative = false);
     GLfloat GetHAngle() { return h_angle; }
@@ -135,6 +148,9 @@ public:
     //Vykresleni uzivatelskeho rozhrani
     void DrawUI();
 
+    void SetGameState(GameState newstate) { m_gameState = newstate; }
+    GameState GetGameState() { return m_gameState; }
+
     //Diff system
     void SetDiff(clock_t diff) { m_diff = diff; };
     clock_t GetDiff() { return m_diff; };
@@ -149,6 +165,8 @@ protected:
     uint32 LastTextureID;
 
     clock_t m_diff;
+
+    GameState m_gameState;
 
     uint32 PlayerModelId;
     uint32 PlayerModelListId;

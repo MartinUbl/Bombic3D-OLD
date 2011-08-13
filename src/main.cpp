@@ -230,10 +230,13 @@ int InitGL(GLvoid)
 
     glEnable(GL_TEXTURE_2D);        //Povoleni texturovani
     glShadeModel(GL_SMOOTH);        //Model shadingu
-    glClearColor(0.0f, 0.0f, 1.0f, 0.0f);    //Barva pozadi (default, zde svetle tyrkysova)
+    glClearColor(0.0f, 0.0f, 1.0f, 0.0f);    //Barva pozadi (default, zde modra)
     glClearDepth(1.0f);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
+    glDisable(GL_CULL_FACE);
+    glPolygonMode(GL_FRONT, GL_FILL);
+    glPolygonMode(GL_BACK, GL_FILL);
     glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);    //Nejlepsi perspektivni korekce
     glEnable(GL_POINT_SMOOTH);
     glEnable(GL_LINE_SMOOTH);
@@ -587,7 +590,8 @@ int WINAPI WinMain(    HINSTANCE    hInstance,
         return 0;
     }
 
-    ShowCursor(false);
+    // TODO: our own cursor
+    ShowCursor(true);
 
     while(!done)
     {

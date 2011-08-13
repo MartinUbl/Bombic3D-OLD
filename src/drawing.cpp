@@ -47,6 +47,10 @@ void Display::Initialize()
         MessageBox(hWnd,"Nepovedlo se naèíst mapu","Error",0);
         exit(0);
     }
+
+    SetGameState(GAME_MENU);
+    DrawModel(0.2f,-5,0,4,ANIM_IDLE,true, 2.0f);
+
     //Pracovni emitter, vymazat po doladeni
     //gEmitterMgr.AddEmitter(-view_x,-view_y,-view_z,0,2,0,1,3,0.3f,0.5f,3,6,10000,10000,1000,10,false,EMIT_FLAG_RANDOM_ROTATE);
     //Pracovni animace
@@ -57,13 +61,14 @@ void Display::Initialize()
     text[2] = 0;
     gTextureAnimationMgr.AddAnimatedTexture(text,3,500);
     //Pracovni billboard
-    DrawBillboard(2,2,2,3,1,3,true);
-    DrawBillboard(2.5f,2,2.5f,3,1,3,true);
+    //DrawBillboard(2,2,2,3,1,3,true);
+    //DrawBillboard(2.5f,2,2.5f,3,1,3,true);
 }
 
 void DisplayStore::FillCustomNeededData()
 {
     NeededFloorTextures.push_back(3);
+    NeededFloorTextures.push_back(4);
 }
 
 //Inicializace display listu pro aktualni mapu a umisteni
@@ -88,6 +93,31 @@ void Display::InitModelDisplayList()
 //Aktualizace zobrazeni (v promenne diff ulozen cas od posledni aktualizace)
 void Display::DoTick()
 {
+    switch (m_gameState)
+    {
+        case GAME_MENU:
+            DrawMenu();
+            break;
+        case GAME_GAME:
+            DrawGame();
+            break;
+    }
+
+    FlushTextDisplayList();
+}
+
+void Display::DrawMenu()
+{
+    DrawModels();
+
+    //Vykresleni uzivatelskeho rozhrani
+    gInterface.Draw();
+
+    DrawTexts();
+}
+
+void Display::DrawGame()
+{
     //vertikalni natoceni kamery
     glRotatef(v_angle,1.0f,0.0f,0.0f);
 
@@ -99,8 +129,10 @@ void Display::DoTick()
     UpdatePlayerModelPosition();
 
     //Bodove svetlo, po dodelani prostredi vymazat!
-    GLfloat DiffuseLightParam[] = {0.2f,0.2f,0.2f,1.0f};
-    GLfloat DiffuseLightPos[]   = {view_x,view_y,view_z,1.0f};
+    GLfloat AmbientLightParam[] = {0.9f,0.9f,0.9f,1.0f};
+    GLfloat DiffuseLightParam[] = {0.2f,0.2f,0.2f,0.1f};
+    GLfloat DiffuseLightPos[]   = {-view_x+MODPOS_X,view_y,-view_z+MODPOS_X,1.0f};
+    glLightfv(GL_LIGHT1, GL_AMBIENT, AmbientLightParam);
     glLightfv(GL_LIGHT1, GL_DIFFUSE, DiffuseLightParam);
     glLightfv(GL_LIGHT1, GL_POSITION,DiffuseLightPos);
 
@@ -123,7 +155,7 @@ void Display::DoTick()
     this->DrawText(-0.052f,-0.037f, "X: %f, Y: %f, Z: %f, [%u,%u]", view_x, view_y, view_z,int(fabs((view_x)/MAP_SCALE_X))+1,int(fabs((view_z)/MAP_SCALE_Z))+1);
 
     //Vykresleni uzivatelskeho rozhrani
-    //gInterface.Draw();
+    gInterface.Draw();
 
     DrawTexts();
 
@@ -355,7 +387,9 @@ void Display::DrawModels()
             {
                 glEnable(GL_TEXTURE_2D);
                 glColor3ub(255, 255, 255);
-                glBindTexture(GL_TEXTURE_2D, gDisplayStore.ModelTextures[gDisplayStore.GetTextureId(pObject->materialID)]);
+                glBindTexture(GL_TEXTURE_2D, pModel->pMaterials[pObject->materialID].texureId);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
             }
             else
             {

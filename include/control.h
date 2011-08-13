@@ -2,6 +2,7 @@
 #define _CONTROL_H__
 
 #include <game_inc.h>
+#include "drawing.h"
 
 enum MouseButton
 {
@@ -15,6 +16,7 @@ struct UIRecord
 {
     short id;
     uint32 x,y;
+    GameState StateRestriction;
     void (*DrawHandler)(void);
     bool (*ClickHandler)(uint32 x, uint32 y, MouseButton button, bool press);
 };
@@ -59,7 +61,7 @@ private:
 extern Interface gInterface;
 
 // Externi definice install funkci UI prvku
-extern UIRecord* DHInstall_UITest();
+extern UIRecord* DHInstall_UIMenu();
 
 #endif
 

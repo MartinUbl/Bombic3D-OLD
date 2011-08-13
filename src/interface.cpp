@@ -35,6 +35,8 @@ void Interface::Draw()
     glPushMatrix();
     glLoadIdentity();
 
+    glEnable(GL_TEXTURE_2D);
+
     /* Vykresleni vsech UI prvku pomoci jejich draw handleru
      * Vyjimkou muze byt napriklad fixne ulozeny mizejici prvek, tomu
      * se pak priradi zaporne ID a neni vykreslen
@@ -43,7 +45,8 @@ void Interface::Draw()
      */
     for(int i = 0; i < numrecords; i++)
         if(pUIRecords[i] >= 0 && pUIRecords[i]->DrawHandler != NULL)
-            pUIRecords[i]->DrawHandler();
+            if((pUIRecords[i]->StateRestriction == 0) || (gDisplay.GetGameState() == pUIRecords[i]->StateRestriction))
+                pUIRecords[i]->DrawHandler();
 
     // Prechod zpatky do 3D, vraceni matrixu do puvodnich parametru
     glMatrixMode(GL_PROJECTION);
@@ -70,6 +73,6 @@ void Interface::LoadUI()
     /* Zaregistrovani vsech dostupnych a potrebnych UI prvku (nektere mohou
      * pribyt az za behu programu (docasne, mizejici, atp..)
      */
-    RegisterUIRecord(DHInstall_UITest());
+    RegisterUIRecord(DHInstall_UIMenu());
 }
 
