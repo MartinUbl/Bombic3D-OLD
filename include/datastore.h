@@ -24,6 +24,13 @@ struct ModelDataStore_t
 };
 typedef std::map<uint32, ModelDataStore_t> ModelDataStore;
 
+//Sablona pro ID a data skyboxu
+struct SkyboxDataStore_t
+{
+    uint32 box_textures[6];
+};
+typedef std::map<uint32, SkyboxDataStore_t> SkyboxDataStore;
+
 //Hlavni trida pro uloziste
 class DataStore
 {
@@ -31,10 +38,12 @@ public:
     //Deklarace ulozist
     TextureDataStore TextureData;
     ModelDataStore ModelData;
+    SkyboxDataStore SkyboxData;
 
     //Deklarace jednotlivych nacitacich funkci
     bool LoadTextureData();
     bool LoadModelData();
+    bool LoadSkyboxData();
 
     //Deklarace hlavni nacitaci funkce volane z venci
     bool LoadEFCDS();

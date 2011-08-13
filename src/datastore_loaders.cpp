@@ -5,8 +5,7 @@ bool DataStore::LoadEFCDS()
 {
     bool success = true;
 
-    success = LoadTextureData();
-    success = LoadModelData();
+    success = LoadTextureData() && LoadModelData() && LoadSkyboxData();
 
     return success;
 }
@@ -85,6 +84,36 @@ bool DataStore::LoadModelData()
         AnimType type = (AnimType)q.getval();
         ModelData[modelid].AnimData[type].first = (uint32)q.getval();
         ModelData[modelid].AnimData[type].second = (uint32)q.getval();
+    }
+    q.free_result();
+
+    return true;
+}
+
+//Nacteni dat pro skyboxy
+bool DataStore::LoadSkyboxData()
+{
+    char efcds_filename[256];
+    sprintf(efcds_filename,"%s/efcds/skybox.efcds",DATA_PATH);
+    Database db(mutex,efcds_filename,&log);
+    Query q(db);
+
+    //Nacteni ID a jmen textur
+    SkyboxDataStore_t TempData;
+    uint32 id = 0;
+    memset(&TempData,0,sizeof(SkyboxDataStore_t));
+
+    q.get_result("select * from skybox_data");
+
+    if(q.num_rows() == 0)
+        return false;
+
+    while (q.fetch_row())
+    {
+        id = q.getval();
+        for (int i = 0; i < 6; i++)
+            TempData.box_textures[i] = q.getuval();
+        SkyboxData[id] = TempData;
     }
     q.free_result();
 

@@ -69,6 +69,13 @@ void DisplayStore::FillCustomNeededData()
 {
     NeededFloorTextures.push_back(3);
     NeededFloorTextures.push_back(4);
+
+    NeededFloorTextures.push_back(5);
+    NeededFloorTextures.push_back(6);
+    NeededFloorTextures.push_back(7);
+    NeededFloorTextures.push_back(8);
+    NeededFloorTextures.push_back(9);
+    NeededFloorTextures.push_back(10);
 }
 
 //Inicializace display listu pro aktualni mapu a umisteni
@@ -144,6 +151,10 @@ void Display::DrawGame()
 
     //Povoleni mapovani textur
     glEnable(GL_TEXTURE_2D);
+
+    // Vykresleni skyboxu
+    DrawSkybox();
+
     //Nabindovat defaultni texturu
     BindMapDefaultTexture();
 
@@ -173,6 +184,77 @@ void Display::DrawGame()
     glDisable(GL_LIGHT1);
 
     FlushTextDisplayList();
+}
+
+void Display::DrawSkybox()
+{
+    /*
+    Skybox data struktura:
+        id
+        box_textures[6]
+            0 = dolni
+            1 = horni
+            2 = zadni
+            3 = predni
+            4 = vlevo
+            5 = vpravo
+    */
+    uint32 m_skybox = 1;
+    GLfloat skyboxSize = 50.0f;
+
+    // Predni cast
+    glBindTexture(GL_TEXTURE_2D, gDisplayStore.FloorTextures[gDataStore.SkyboxData[m_skybox].box_textures[3]]);
+    glBegin(GL_QUADS);
+        glTexCoord2f(1, 1); glVertex3f(  skyboxSize, -skyboxSize, -skyboxSize );
+        glTexCoord2f(0, 1); glVertex3f( -skyboxSize, -skyboxSize, -skyboxSize );
+        glTexCoord2f(0, 0); glVertex3f( -skyboxSize,  skyboxSize, -skyboxSize );
+        glTexCoord2f(1, 0); glVertex3f(  skyboxSize,  skyboxSize, -skyboxSize );
+    glEnd();
+
+    // Cast vlevo
+    glBindTexture(GL_TEXTURE_2D, gDisplayStore.FloorTextures[gDataStore.SkyboxData[m_skybox].box_textures[4]]);
+    glBegin(GL_QUADS);
+        glTexCoord2f(1, 1); glVertex3f(  skyboxSize, -skyboxSize,  skyboxSize );
+        glTexCoord2f(0, 1); glVertex3f(  skyboxSize, -skyboxSize, -skyboxSize );
+        glTexCoord2f(0, 0); glVertex3f(  skyboxSize,  skyboxSize, -skyboxSize );
+        glTexCoord2f(1, 0); glVertex3f(  skyboxSize,  skyboxSize,  skyboxSize );
+    glEnd();
+
+    // Zadni cast
+    glBindTexture(GL_TEXTURE_2D, gDisplayStore.FloorTextures[gDataStore.SkyboxData[m_skybox].box_textures[2]]);
+    glBegin(GL_QUADS);
+        glTexCoord2f(1, 1); glVertex3f( -skyboxSize, -skyboxSize,  skyboxSize );
+        glTexCoord2f(0, 1); glVertex3f(  skyboxSize, -skyboxSize,  skyboxSize );
+        glTexCoord2f(0, 0); glVertex3f(  skyboxSize,  skyboxSize,  skyboxSize );
+        glTexCoord2f(1, 0); glVertex3f( -skyboxSize,  skyboxSize,  skyboxSize );
+    glEnd();
+
+    // Cast vpravo
+    glBindTexture(GL_TEXTURE_2D, gDisplayStore.FloorTextures[gDataStore.SkyboxData[m_skybox].box_textures[5]]);
+    glBegin(GL_QUADS);
+        glTexCoord2f(1, 1); glVertex3f( -skyboxSize, -skyboxSize, -skyboxSize );
+        glTexCoord2f(0, 1); glVertex3f( -skyboxSize, -skyboxSize,  skyboxSize );
+        glTexCoord2f(0, 0); glVertex3f( -skyboxSize,  skyboxSize,  skyboxSize );
+        glTexCoord2f(1, 0); glVertex3f( -skyboxSize,  skyboxSize, -skyboxSize );
+    glEnd();
+
+    // Strop
+    glBindTexture(GL_TEXTURE_2D, gDisplayStore.FloorTextures[gDataStore.SkyboxData[m_skybox].box_textures[1]]);
+    glBegin(GL_QUADS);
+        glTexCoord2f(0, 1); glVertex3f( -skyboxSize,  skyboxSize, -skyboxSize );
+        glTexCoord2f(0, 0); glVertex3f( -skyboxSize,  skyboxSize,  skyboxSize );
+        glTexCoord2f(1, 0); glVertex3f(  skyboxSize,  skyboxSize,  skyboxSize );
+        glTexCoord2f(1, 1); glVertex3f(  skyboxSize,  skyboxSize, -skyboxSize );
+    glEnd();
+
+    // Spodni cast
+    glBindTexture(GL_TEXTURE_2D, gDisplayStore.FloorTextures[gDataStore.SkyboxData[m_skybox].box_textures[0]]);
+    glBegin(GL_QUADS);
+        glTexCoord2f(0, 0); glVertex3f( -skyboxSize, -skyboxSize, -skyboxSize );
+        glTexCoord2f(0, 1); glVertex3f( -skyboxSize, -skyboxSize,  skyboxSize );
+        glTexCoord2f(1, 1); glVertex3f(  skyboxSize, -skyboxSize,  skyboxSize );
+        glTexCoord2f(1, 0); glVertex3f(  skyboxSize, -skyboxSize, -skyboxSize );
+    glEnd();
 }
 
 //Horizontalni otoceni kamery

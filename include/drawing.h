@@ -147,6 +147,8 @@ public:
     void DrawMap();
     //Vykresleni uzivatelskeho rozhrani
     void DrawUI();
+    // Vykresleni skyboxu
+    void DrawSkybox();
 
     void SetGameState(GameState newstate) { m_gameState = newstate; }
     GameState GetGameState() { return m_gameState; }
