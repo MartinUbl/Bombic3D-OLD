@@ -73,7 +73,7 @@ extern HDC hDc;
 
 extern bool ExtLog(int i);
 extern bool readstr(FILE *f, char *string);
-extern GLvoid glPrint(const char *fmt, ...);
+extern GLvoid glPrint(GLfloat x, GLfloat y, const char *fmt, ...);
 extern vector<string> explode(const string& str, const char& ch);
 
 struct TSettings

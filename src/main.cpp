@@ -65,32 +65,33 @@ vector<string> explode(const string& str, const char& ch)
 }
 
 //Vytvoreni fontu
-GLvoid BuildFont(GLvoid)                                // Build Our Bitmap Font
+GLvoid BuildFont(GLvoid)
 {
-    HFONT    font;                                      // Windows Font ID
-    HFONT    oldfont;                                   // Used For Good House Keeping
+    float cx;
+    float cy;
 
-    base = glGenLists(96);                              // Storage For 96 Characters
+    GLint charsize = 16;
+    float charoffset = 1.0f/charsize;
+    float spacing = 11.0f;
 
-    font = CreateFont(  -24,                            // Height Of Font
-                        0,                              // Width Of Font
-                        0,                              // Angle Of Escapement
-                        0,                              // Orientation Angle
-                        FW_BOLD,                        // Font Weight
-                        FALSE,                          // Italic
-                        FALSE,                          // Underline
-                        FALSE,                          // Strikeout
-                        ANSI_CHARSET,                   // Character Set Identifier
-                        OUT_TT_PRECIS,                  // Output Precision
-                        CLIP_DEFAULT_PRECIS,            // Clipping Precision
-                        ANTIALIASED_QUALITY,            // Output Quality
-                        FF_DONTCARE|DEFAULT_PITCH,      // Family And Pitch
-                        "Courier New");                 // Font Name
+    base = glGenLists(256);
 
-    oldfont = (HFONT)SelectObject(hDC, font);           // Selects The Font We Want
-    wglUseFontBitmaps(hDC, 32, 96, base);               // Builds 96 Characters Starting At Character 32
-    SelectObject(hDC, oldfont);                         // Selects The Font We Want
-    DeleteObject(font);                                 // Delete The Font
+    glBindTexture(GL_TEXTURE_2D, gDisplayStore.FloorTextures[17]);
+    for (uint16 loop = 0; loop < 256; loop++)
+    {
+        cx = float(loop%charsize)/float(charsize);
+        cy = float(loop/charsize)/float(charsize)+charoffset;
+
+        glNewList(base+loop,GL_COMPILE);
+          glBegin(GL_QUADS);
+            glTexCoord2f(cx,           cy-charoffset); glVertex2i(0,       0);
+            glTexCoord2f(cx+charoffset,cy-charoffset); glVertex2i(charsize,0);
+            glTexCoord2f(cx+charoffset,cy);            glVertex2i(charsize,charsize);
+            glTexCoord2f(cx,           cy);            glVertex2i(0,       charsize);
+          glEnd();
+          glTranslated(spacing,0,0);
+        glEndList();
+    }
 }
 
 GLvoid KillFont(GLvoid)
@@ -99,22 +100,39 @@ GLvoid KillFont(GLvoid)
 }
 
 //Vykresleni textu
-GLvoid glPrint(const char *fmt, ...)                    // Custom GL "Print" Routine
+GLvoid glPrint(GLfloat x, GLfloat y, const char *fmt, ...)
 {
-    char    text[256];                                  // Holds Our String
-    va_list ap;                                         // Pointer To List Of Arguments
+    char    text[512];
+    va_list ap;
 
-    if (fmt == NULL)                                    // If There's No Text
-        return;                                         // Do Nothing
+    if (fmt == NULL)
+        return;
 
-    va_start(ap, fmt);                                  // Parses The String For Variables
-      vsprintf(text, fmt, ap);                          // And Converts Symbols To Actual Numbers
-    va_end(ap);                                         // Results Are Stored In Text
+    va_start(ap, fmt);
+      vsprintf(text, fmt, ap);
+    va_end(ap);
 
-    glPushAttrib(GL_LIST_BIT);                          // Pushes The Display List Bits
-    glListBase(base - 32);                              // Sets The Base Character to 32
-    glCallLists(strlen(text), GL_UNSIGNED_BYTE, text);  // Draws The Display List Text
-    glPopAttrib();                                      // Pops The Display List Bits
+    int vPort[4];
+    glGetIntegerv(GL_VIEWPORT, vPort);
+
+    glBindTexture(GL_TEXTURE_2D, gDisplayStore.FloorTextures[17]);
+    glDisable(GL_DEPTH_TEST);
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+
+    glOrtho(vPort[0], vPort[0]+vPort[2], vPort[1]+vPort[3], vPort[1], -1, 1);
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+    glTranslated(x,y,0);
+    glListBase(base-32);
+    glCallLists(strlen(text),GL_UNSIGNED_BYTE,text);
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
+    glEnable(GL_DEPTH_TEST);
 }
 
 //Cteni jedne radky ze souboru, helper funkce

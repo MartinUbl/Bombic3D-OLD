@@ -75,6 +75,7 @@ void DisplayStore::FillCustomNeededData()
     NeededFloorTextures.push_back(14);
     NeededFloorTextures.push_back(15);
     NeededFloorTextures.push_back(16);
+    NeededFloorTextures.push_back(17);
 
     // Skybox - odstranit s podporou dynamickeho nacitani obsahu
     NeededFloorTextures.push_back(5);
@@ -567,16 +568,10 @@ void Display::DrawTexts()
     if(gDisplayStore.TextDisplayList.empty())
         return;
 
-    /*glLoadIdentity();
-    glTranslatef(0.0f,0.0f,-0.1f);*/
-
     for(int i = 0; i < gDisplayStore.TextDisplayList.size(); ++i)
     {
         if(gDisplayStore.TextDisplayList[i]->what.c_str())
-        {
-            glRasterPos2f(gDisplayStore.TextDisplayList[i]->x,gDisplayStore.TextDisplayList[i]->y);
-            glPrint(gDisplayStore.TextDisplayList[i]->what.c_str());
-        }
+            glPrint(gDisplayStore.TextDisplayList[i]->x, gDisplayStore.TextDisplayList[i]->y, gDisplayStore.TextDisplayList[i]->what.c_str());
     }
 
     glLoadIdentity();

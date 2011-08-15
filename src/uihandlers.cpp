@@ -79,16 +79,16 @@ void ConnectingDrawHandler_RoomList()
 
     // Priklad
     // TODO: odstranit se sitovanim a ziskavanim mistnosti ze serveru
-    pField->fieldcontent = "1|Prvni hra|0/4|Kennny|2|Druha hra|4/4|Kennny2";
+    pField->fieldcontent = "1|Ìšèøıáíé|0/4|Kennny|2|ìŠÈØİÁÍÉ|4/4|Kennny2";
 
     // Priblizne se prepocita podle vysky okna (18 je pro 768px na vysku okna)
     std::vector<string> exploded = explode(pField->fieldcontent.c_str(),'|');
     for (int i = 0; (i < exploded.size()/4) && (i < (18*gConfig.WindowHeight/768)); i++)
     {
-        gDisplay.DrawText(5*WIDTH_PCT+10, 205.0f+i*27,"%s",exploded[(i*4)+0].c_str());
-        gDisplay.DrawText(10*WIDTH_PCT  , 205.0f+i*27,"%s",exploded[(i*4)+1].c_str());
-        gDisplay.DrawText(50*WIDTH_PCT  , 205.0f+i*27,"%s",exploded[(i*4)+2].c_str());
-        gDisplay.DrawText(70*WIDTH_PCT  , 205.0f+i*27,"%s",exploded[(i*4)+3].c_str());
+        gDisplay.DrawText(5*WIDTH_PCT+10, 194.0f+i*27,"%s",exploded[(i*4)+0].c_str());
+        gDisplay.DrawText(10*WIDTH_PCT  , 194.0f+i*27,"%s",exploded[(i*4)+1].c_str());
+        gDisplay.DrawText(50*WIDTH_PCT  , 194.0f+i*27,"%s",exploded[(i*4)+2].c_str());
+        gDisplay.DrawText(70*WIDTH_PCT  , 194.0f+i*27,"%s",exploded[(i*4)+3].c_str());
     }
 
     DrawUIElement(14, 5*WIDTH_PCT, 190.0f+pField->store[0]*27-2, 90*WIDTH_PCT, 28);
