@@ -91,16 +91,6 @@ void Interface::MouseBtnPress(MouseButton btn, uint32 x, uint32 y)
         if (btn == MOUSE_LEFT && gDisplay.GetGameState() == GAME_GAME)
             gGamePlay.PlantBomb();
 
-        GLint m_viewport[4];
-        glGetIntegerv( GL_VIEWPORT, m_viewport );
-
-        /* Musime prehodit souradnice, aby se lepe detekovala oblast kam klikame
-         * Windows posle souradnice od leveho horniho rohu, my potrebujeme od
-         * leveho spodniho rohu
-         */
-        uint32 trans_x = /*m_viewport[2] - */x;
-        uint32 trans_y =   m_viewport[3] - y;
-
         /* Projdou se vsechny UI prvky a postupne se vyzkousi, zdali si kliknuti
          * zpracuji. Pokud ano, cyklus se prerusi, protoze staci osefovat kliknuti
          * jednim handlerem.
@@ -110,7 +100,7 @@ void Interface::MouseBtnPress(MouseButton btn, uint32 x, uint32 y)
         for(int i = 0; i < numrecords; i++)
             if(pUIRecords[i] >= 0 && pUIRecords[i]->ClickHandler != NULL)
                 if((pUIRecords[i]->StateRestriction == 0) || (gDisplay.GetGameState() == pUIRecords[i]->StateRestriction))
-                    if(pUIRecords[i]->ClickHandler(trans_x,trans_y,btn,true))
+                    if(pUIRecords[i]->ClickHandler(x,y,btn,true))
                         break;
     }
 }

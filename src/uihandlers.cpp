@@ -12,52 +12,42 @@
  Y range zhruba <-0.042f;0.042f> (odspoda nahoru)
 */
 
+void DrawUIElement(uint32 textureId, float left, float top, float width, float height)
+{
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+
+    glBindTexture(GL_TEXTURE_2D,gDisplayStore.FloorTextures[textureId]);
+
+    glBegin(GL_QUADS);
+      glColor3ub(255, 255, 255);
+        glTexCoord2f(1.0f, 0.0f); glVertex2d(left+width, top+0);
+        glTexCoord2f(1.0f, 1.0f); glVertex2d(left+width, top+height);
+        glTexCoord2f(0.0f, 1.0f); glVertex2d(left+0, top+height);
+        glTexCoord2f(0.0f, 0.0f); glVertex2d(left+0, top+0);
+    glEnd();
+}
+
 /// Handler vykresleni menu - nova hra
 void MenuDrawHandler_NewGame()
 {
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-    glBindTexture(GL_TEXTURE_2D,gDisplayStore.FloorTextures[4]);
-
-    glBegin(GL_QUADS);
-      glColor3ub(255, 255, 255);
-        GLfloat lpos = 90*WIDTH_PCT-340; // pozice od leva
-        GLfloat bpos = 90*HEIGHT_PCT-80; // pozice od spoda
-        glTexCoord2f(1.0f, 1.0f); glVertex2d(lpos+340, bpos+0);
-        glTexCoord2f(1.0f, 0.0f); glVertex2d(lpos+340, bpos+80);
-        glTexCoord2f(0.0f, 0.0f); glVertex2d(lpos+0, bpos+80);
-        glTexCoord2f(0.0f, 1.0f); glVertex2d(lpos+0, bpos+0);
-    glEnd();
+    DrawUIElement(4, 90*WIDTH_PCT-340, 10*HEIGHT_PCT, 340, 80);
 }
 void MenuDrawHandler_ExitGame()
 {
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-    glBindTexture(GL_TEXTURE_2D,gDisplayStore.FloorTextures[11]);
-
-    glBegin(GL_QUADS);
-      glColor3ub(255, 255, 255);
-        GLfloat lpos = 90*WIDTH_PCT-340; // pozice od leva
-        GLfloat bpos = 90*HEIGHT_PCT-80-80-30; // pozice od spoda
-        glTexCoord2f(1.0f, 1.0f); glVertex2d(lpos+340, bpos+0);
-        glTexCoord2f(1.0f, 0.0f); glVertex2d(lpos+340, bpos+80);
-        glTexCoord2f(0.0f, 0.0f); glVertex2d(lpos+0, bpos+80);
-        glTexCoord2f(0.0f, 1.0f); glVertex2d(lpos+0, bpos+0);
-    glEnd();
+    DrawUIElement(11, 90*WIDTH_PCT-340, 10*HEIGHT_PCT+80+30, 340, 80);
 }
 /// Handler osetreni kliknuti menu
 bool MenuClickHandler(unsigned int x, unsigned int y, MouseButton button, bool press)
 {
     // Nova Hra
-    if ( (x > 90*WIDTH_PCT-340) && (x < 90*WIDTH_PCT) && (y > 90*HEIGHT_PCT-80) && (y < 90*HEIGHT_PCT) )
+    if ( (x > 90*WIDTH_PCT-340) && (x < 90*WIDTH_PCT) && (y > 10*HEIGHT_PCT) && (y < 10*HEIGHT_PCT+80) )
     {
-        //gDisplay.FlushModelDisplayList();
-        //gDisplay.InitModelDisplayList();
         gDisplay.SetGameState(GAME_CONNECTING);
         return true;
     }
     // Odejit
-    else if ( (x > 90*WIDTH_PCT-340) && (x < 90*WIDTH_PCT) && (y > 90*HEIGHT_PCT-80-80-30) && (y < 90*HEIGHT_PCT-80-30) )
+    else if ( (x > 90*WIDTH_PCT-340) && (x < 90*WIDTH_PCT) && (y > 10*HEIGHT_PCT+80+30) && (y < 10*HEIGHT_PCT+80+80+30) )
     {
         exit(0);
         return true;
@@ -68,65 +58,22 @@ bool MenuClickHandler(unsigned int x, unsigned int y, MouseButton button, bool p
 
 void ConnectingDrawHandler_NicknameField()
 {
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-    glBindTexture(GL_TEXTURE_2D,gDisplayStore.FloorTextures[12]);
-
-    glBegin(GL_QUADS);
-      glColor3ub(255, 255, 255);
-        GLfloat lpos = 20; // pozice od leva
-        GLfloat bpos = 670; // pozice od spoda
-        glTexCoord2f(1.0f, 1.0f); glVertex2d(lpos+500, bpos+0);
-        glTexCoord2f(1.0f, 0.0f); glVertex2d(lpos+500, bpos+80);
-        glTexCoord2f(0.0f, 0.0f); glVertex2d(lpos+0, bpos+80);
-        glTexCoord2f(0.0f, 1.0f); glVertex2d(lpos+0, bpos+0);
-    glEnd();
+    DrawUIElement(12, 20, 20, 500, 80);
 
     UIRecord* pField = gInterface.GetUIRecordByType(UI_TYPE_CONNECTING_FIELD_NICKNAME);
     if (!pField)
         return;
 
-    gDisplay.DrawText(-0.049f,0.033f,"%s",pField->fieldcontent.c_str());
+    gDisplay.DrawText(-0.049f,0.0325f,"%s",pField->fieldcontent.c_str());
 }
 void ConnectingDrawHandler_RoomList()
 {
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-    glBindTexture(GL_TEXTURE_2D,gDisplayStore.FloorTextures[13]);
-
-    glBegin(GL_QUADS);
-      glColor3ub(255, 255, 255);
-        GLfloat lpos = 20; // pozice od leva
-        GLfloat bpos = 570; // pozice od spoda
-        glTexCoord2f(1.0f, 1.0f); glVertex2d(lpos+200, bpos+0);
-        glTexCoord2f(1.0f, 0.0f); glVertex2d(lpos+200, bpos+40);
-        glTexCoord2f(0.0f, 0.0f); glVertex2d(lpos+0, bpos+40);
-        glTexCoord2f(0.0f, 1.0f); glVertex2d(lpos+0, bpos+0);
-    glEnd();
-
+    DrawUIElement(13, 20, 120, 200, 40);
     // Textura 14 = cervena 40% alpha, 15 = modra 40% alpha
 
-    glBindTexture(GL_TEXTURE_2D,gDisplayStore.FloorTextures[15]);
-    glBegin(GL_QUADS);
-      glColor3ub(255, 255, 255);
-        lpos = 5*WIDTH_PCT; // pozice od leva
-        bpos = 550; // pozice od spoda
-        glTexCoord2f(1.0f, 1.0f); glVertex2d(95*WIDTH_PCT, bpos+0);
-        glTexCoord2f(1.0f, 0.0f); glVertex2d(95*WIDTH_PCT, 10*HEIGHT_PCT);
-        glTexCoord2f(0.0f, 0.0f); glVertex2d(lpos+0, 10*HEIGHT_PCT);
-        glTexCoord2f(0.0f, 1.0f); glVertex2d(lpos+0, bpos+0);
-    glEnd();
+    DrawUIElement(15, 5*WIDTH_PCT, 180, 90*WIDTH_PCT, 100*HEIGHT_PCT-180-10*HEIGHT_PCT);
 
-    glBindTexture(GL_TEXTURE_2D,gDisplayStore.FloorTextures[16]);
-    glBegin(GL_QUADS);
-      glColor3ub(255, 255, 255);
-        lpos = 95*WIDTH_PCT-200; // pozice od leva
-        bpos = 8*HEIGHT_PCT-40; // pozice od spoda
-        glTexCoord2f(1.0f, 1.0f); glVertex2d(lpos+200, bpos+0);
-        glTexCoord2f(1.0f, 0.0f); glVertex2d(lpos+200, bpos+40);
-        glTexCoord2f(0.0f, 0.0f); glVertex2d(lpos+0, bpos+40);
-        glTexCoord2f(0.0f, 1.0f); glVertex2d(lpos+0, bpos+0);
-    glEnd();
+    DrawUIElement(16, 95*WIDTH_PCT-200, 92*HEIGHT_PCT, 200, 40);
 }
 bool ConnectingClickHandler(unsigned int x, unsigned int y, MouseButton button, bool press)
 {
@@ -137,7 +84,7 @@ bool ConnectingClickHandler(unsigned int x, unsigned int y, MouseButton button, 
     if (!pField)
         return false;
 
-    if (x > 20 && x < 20+500 && y > 670 && y < 670+80)
+    if (x > 20 && x < 20+500 && y > 20 && y < 20+80)
     {
         if (!pField->active)
         {
@@ -155,7 +102,7 @@ bool ConnectingClickHandler(unsigned int x, unsigned int y, MouseButton button, 
         }
     }
 
-    if (x > 95*WIDTH_PCT-200 && x < 95*WIDTH_PCT && y > 8*HEIGHT_PCT-40 && y < 8*HEIGHT_PCT)
+    if (x > 95*WIDTH_PCT-200 && x < 95*WIDTH_PCT && y > 92*HEIGHT_PCT && y < 92*HEIGHT_PCT+40)
     {
         // TODO:  handling do network vlakna, zde jen poslat packet!
         gDisplay.FlushModelDisplayList();
