@@ -64,7 +64,7 @@ void ConnectingDrawHandler_NicknameField()
     if (!pField)
         return;
 
-    gDisplay.DrawText(-0.049f,0.0325f,"%s",pField->fieldcontent.c_str());
+    gDisplay.DrawText(52,82,"%s",pField->fieldcontent.c_str());
 }
 void ConnectingDrawHandler_RoomList()
 {
@@ -72,6 +72,26 @@ void ConnectingDrawHandler_RoomList()
     // Textura 14 = cervena 40% alpha, 15 = modra 40% alpha
 
     DrawUIElement(15, 5*WIDTH_PCT, 180, 90*WIDTH_PCT, 100*HEIGHT_PCT-180-10*HEIGHT_PCT);
+
+    UIRecord* pField = gInterface.GetUIRecordByType(UI_TYPE_CONNECTING_FIELD_ROOMS_LIST);
+    if (!pField)
+        return;
+
+    // Priklad
+    // TODO: odstranit se sitovanim a ziskavanim mistnosti ze serveru
+    pField->fieldcontent = "1|Prvni hra|0/4|Kennny|2|Druha hra|4/4|Kennny2";
+
+    // Priblizne se prepocita podle vysky okna (18 je pro 768px na vysku okna)
+    std::vector<string> exploded = explode(pField->fieldcontent.c_str(),'|');
+    for (int i = 0; (i < exploded.size()/4) && (i < (18*gConfig.WindowHeight/768)); i++)
+    {
+        gDisplay.DrawText(5*WIDTH_PCT+10, 205.0f+i*27,"%s",exploded[(i*4)+0].c_str());
+        gDisplay.DrawText(10*WIDTH_PCT  , 205.0f+i*27,"%s",exploded[(i*4)+1].c_str());
+        gDisplay.DrawText(50*WIDTH_PCT  , 205.0f+i*27,"%s",exploded[(i*4)+2].c_str());
+        gDisplay.DrawText(70*WIDTH_PCT  , 205.0f+i*27,"%s",exploded[(i*4)+3].c_str());
+    }
+
+    DrawUIElement(14, 5*WIDTH_PCT, 190.0f+pField->store[0]*27-2, 90*WIDTH_PCT, 28);
 
     DrawUIElement(16, 95*WIDTH_PCT-200, 92*HEIGHT_PCT, 200, 40);
 }
@@ -100,6 +120,19 @@ bool ConnectingClickHandler(unsigned int x, unsigned int y, MouseButton button, 
             pField->fieldcontent.erase(pField->fieldcontent.size()-1);
             pField->active = false;
         }
+    }
+
+    pField = gInterface.GetUIRecordByType(UI_TYPE_CONNECTING_FIELD_ROOMS_LIST);
+    if (!pField)
+        return false;
+
+    if (x > 5*WIDTH_PCT && x < 95*WIDTH_PCT && y > 190 && ((y < 190+(18*gConfig.WindowHeight/768)*27) && y < 90*HEIGHT_PCT))
+    {
+        uint32 pos = (y-190)/27;
+
+        std::vector<string> exploded = explode(pField->fieldcontent.c_str(),'|');
+        if ((exploded.size()/4) > pos)
+            pField->store[0] = (y-190)/27;
     }
 
     if (x > 95*WIDTH_PCT-200 && x < 95*WIDTH_PCT && y > 92*HEIGHT_PCT && y < 92*HEIGHT_PCT+40)

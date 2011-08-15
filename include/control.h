@@ -38,6 +38,8 @@ struct UIRecord
         KeyStateHandler = NULL;
         active = false;
         fieldcontent = "";
+        for (int i = 0; i < 4; i++)
+            store[i] = 0;
     };
     short id;
     uint32 x,y;
@@ -45,6 +47,7 @@ struct UIRecord
     UIRecordType UIType;
     bool active; // Prevazne jen pro prvky typu FIELD, pro indikaci, zdali se do nich pise nebo ne
     std::string fieldcontent; // Opet jen pro prvky typu FIELD
+    uint16 store[4]; // 5 uloznych promennych
     void (*DrawHandler)(void);
     bool (*ClickHandler)(uint32 x, uint32 y, MouseButton button, bool press);
     bool (*KeyStateHandler)(uint16 key, bool press);

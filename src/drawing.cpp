@@ -129,8 +129,6 @@ void Display::DrawConnecting()
 
     //Vykresleni uzivatelskeho rozhrani
     gInterface.Draw();
-
-    DrawTexts();
 }
 
 void Display::DrawMenu()
@@ -139,8 +137,6 @@ void Display::DrawMenu()
 
     //Vykresleni uzivatelskeho rozhrani
     gInterface.Draw();
-
-    DrawTexts();
 }
 
 void Display::DrawGame()
@@ -193,8 +189,6 @@ void Display::DrawGame()
 
     //Vykresleni uzivatelskeho rozhrani
     gInterface.Draw();
-
-    DrawTexts();
 
     glTranslatef(+MODPOS_X,0,+MODPOS_Z);
 
@@ -573,8 +567,8 @@ void Display::DrawTexts()
     if(gDisplayStore.TextDisplayList.empty())
         return;
 
-    glLoadIdentity();
-    glTranslatef(0.0f,0.0f,-0.1f);
+    /*glLoadIdentity();
+    glTranslatef(0.0f,0.0f,-0.1f);*/
 
     for(int i = 0; i < gDisplayStore.TextDisplayList.size(); ++i)
     {

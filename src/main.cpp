@@ -139,6 +139,9 @@ GLvoid ReSizeGLScene(GLsizei width, GLsizei height)
 
     gluPerspective(45.0f,(GLfloat)width/(GLfloat)height,0.1f,100.0f);
 
+    gConfig.WindowWidth = width;
+    gConfig.WindowHeight = height;
+
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 }

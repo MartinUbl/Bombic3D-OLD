@@ -54,6 +54,8 @@ void Interface::Draw()
             if((pUIRecords[i]->StateRestriction == 0) || (gDisplay.GetGameState() == pUIRecords[i]->StateRestriction))
                 pUIRecords[i]->DrawHandler();
 
+    gDisplay.DrawTexts();
+
     // Prechod zpatky do 3D, vraceni matrixu do puvodnich parametru
     glPopAttrib();
     glMatrixMode(GL_PROJECTION);
