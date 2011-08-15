@@ -112,27 +112,10 @@ GLvoid glPrint(GLfloat x, GLfloat y, const char *fmt, ...)
       vsprintf(text, fmt, ap);
     va_end(ap);
 
-    int vPort[4];
-    glGetIntegerv(GL_VIEWPORT, vPort);
-
-    glBindTexture(GL_TEXTURE_2D, gDisplayStore.FloorTextures[17]);
-    glDisable(GL_DEPTH_TEST);
-    glMatrixMode(GL_PROJECTION);
-    glPushMatrix();
-    glLoadIdentity();
-
-    glOrtho(vPort[0], vPort[0]+vPort[2], vPort[1]+vPort[3], vPort[1], -1, 1);
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
     glLoadIdentity();
     glTranslated(x,y,0);
     glListBase(base-32);
     glCallLists(strlen(text),GL_UNSIGNED_BYTE,text);
-    glMatrixMode(GL_PROJECTION);
-    glPopMatrix();
-    glMatrixMode(GL_MODELVIEW);
-    glPopMatrix();
-    glEnable(GL_DEPTH_TEST);
 }
 
 //Cteni jedne radky ze souboru, helper funkce

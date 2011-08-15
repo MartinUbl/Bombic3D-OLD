@@ -568,11 +568,32 @@ void Display::DrawTexts()
     if(gDisplayStore.TextDisplayList.empty())
         return;
 
+    // Prechod do 2D rezimu kvuli vykresleni textu
+    int vPort[4];
+    glGetIntegerv(GL_VIEWPORT, vPort);
+
+    // Texture 17 je defaultni textova matice
+    glBindTexture(GL_TEXTURE_2D, gDisplayStore.FloorTextures[17]);
+    glDisable(GL_DEPTH_TEST);
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+
+    glOrtho(vPort[0], vPort[0]+vPort[2], vPort[1]+vPort[3], vPort[1], -1, 1);
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+
     for(int i = 0; i < gDisplayStore.TextDisplayList.size(); ++i)
     {
         if(gDisplayStore.TextDisplayList[i]->what.c_str())
             glPrint(gDisplayStore.TextDisplayList[i]->x, gDisplayStore.TextDisplayList[i]->y, gDisplayStore.TextDisplayList[i]->what.c_str());
     }
+
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
+    glEnable(GL_DEPTH_TEST);
 
     glLoadIdentity();
 }
