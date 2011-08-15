@@ -69,7 +69,14 @@ void DisplayStore::FillCustomNeededData()
 {
     NeededFloorTextures.push_back(3);
     NeededFloorTextures.push_back(4);
+    NeededFloorTextures.push_back(11);
+    NeededFloorTextures.push_back(12);
+    NeededFloorTextures.push_back(13);
+    NeededFloorTextures.push_back(14);
+    NeededFloorTextures.push_back(15);
+    NeededFloorTextures.push_back(16);
 
+    // Skybox - odstranit s podporou dynamickeho nacitani obsahu
     NeededFloorTextures.push_back(5);
     NeededFloorTextures.push_back(6);
     NeededFloorTextures.push_back(7);
@@ -105,12 +112,25 @@ void Display::DoTick()
         case GAME_MENU:
             DrawMenu();
             break;
+        case GAME_CONNECTING:
+            DrawConnecting();
+            break;
         case GAME_GAME:
             DrawGame();
             break;
     }
 
     FlushTextDisplayList();
+}
+
+void Display::DrawConnecting()
+{
+    DrawModels();
+
+    //Vykresleni uzivatelskeho rozhrani
+    gInterface.Draw();
+
+    DrawTexts();
 }
 
 void Display::DrawMenu()

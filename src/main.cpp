@@ -316,7 +316,7 @@ GLvoid KillGLWindow(GLvoid)
         hInstance = NULL;
     }
 }
- 
+
 BOOL CreateGLWindow(char* title, int width, int height, int bits, bool fullscreenflag, int refreshrate)
 {
     GLuint PixelFormat;

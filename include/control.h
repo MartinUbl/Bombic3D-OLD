@@ -12,14 +12,46 @@ enum MouseButton
     MOUSE_BUTTONS_MAX
 };
 
+enum UIRecordType
+{
+    UI_TYPE_NONE = 0,
+    UI_TYPE_MENU_BUTTON_NEW_GAME,
+    UI_TYPE_MENU_BUTTON_EXIT_GAME,
+    UI_TYPE_CONNECTING_FIELD_NICKNAME,
+    UI_TYPE_CONNECTING_FIELD_ROOMS_LIST,
+    UI_TYPE_CONNECTING_BUTTON_CONNECT,
+};
+
+#define UI_TYPE_MENU_START UI_TYPE_MENU_BUTTON_NEW_GAME
+#define UI_TYPE_MENU_END   UI_TYPE_MENU_BUTTON_EXIT_GAME
+#define UI_TYPE_CONNECTING_START UI_TYPE_CONNECTING_FIELD_NICKNAME
+#define UI_TYPE_CONNECTING_END   UI_TYPE_CONNECTING_BUTTON_CONNECT
+
 struct UIRecord
 {
+    UIRecord()
+    {
+        StateRestriction = GAME_NONE;
+        UIType = UI_TYPE_NONE;
+        DrawHandler = NULL;
+        ClickHandler = NULL;
+        KeyStateHandler = NULL;
+        active = false;
+        fieldcontent = "";
+    };
     short id;
     uint32 x,y;
     GameState StateRestriction;
+    UIRecordType UIType;
+    bool active; // Prevazne jen pro prvky typu FIELD, pro indikaci, zdali se do nich pise nebo ne
+    std::string fieldcontent; // Opet jen pro prvky typu FIELD
     void (*DrawHandler)(void);
     bool (*ClickHandler)(uint32 x, uint32 y, MouseButton button, bool press);
+    bool (*KeyStateHandler)(uint16 key, bool press);
 };
+
+#define WIDTH_PCT  (float(gConfig.WindowWidth)/100.0f)
+#define HEIGHT_PCT (float(gConfig.WindowHeight)/100.0f)
 
 class Interface
 {
@@ -37,6 +69,7 @@ public:
     void RegisterUIRecord(UIRecord* rec);
     void LoadUI();
     void Draw();
+    UIRecord* GetUIRecordByType(UIRecordType type);
 
     void KeyPress(uint8 key);
     void KeyRelease(uint8 key);
@@ -61,7 +94,10 @@ private:
 extern Interface gInterface;
 
 // Externi definice install funkci UI prvku
-extern UIRecord* DHInstall_UIMenu();
+extern UIRecord* DHInstall_UIMenu_NewGame();
+extern UIRecord* DHInstall_UIMenu_ExitGame();
+extern UIRecord* DHInstall_UIConnecting_NicknameField();
+extern UIRecord* DHInstall_UIConnecting_RoomList();
 
 #endif
 

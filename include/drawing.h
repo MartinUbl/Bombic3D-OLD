@@ -42,6 +42,7 @@ enum GameState
     GAME_NONE = 0,
     GAME_INTRO,
     GAME_MENU,
+    GAME_CONNECTING,
     GAME_LOADING,
     GAME_GAME,
     GAME_EXITING,
@@ -98,6 +99,7 @@ public:
     void Initialize();
     void DoTick();
     void DrawMenu();
+    void DrawConnecting();
     void DrawGame();
     void SetHAngle(float angle, bool relative = false);
     void SetVAngle(float angle, bool relative = false);
@@ -152,6 +154,8 @@ public:
 
     void SetGameState(GameState newstate) { m_gameState = newstate; }
     GameState GetGameState() { return m_gameState; }
+    void SetGameStateStage(uint8 newstage) { m_gameStateStage = newstage; }
+    uint8 GetGameStateStage() { return m_gameStateStage; }
 
     //Diff system
     void SetDiff(clock_t diff) { m_diff = diff; };
@@ -169,6 +173,7 @@ protected:
     clock_t m_diff;
 
     GameState m_gameState;
+    uint8 m_gameStateStage;
 
     uint32 PlayerModelId;
     uint32 PlayerModelListId;
