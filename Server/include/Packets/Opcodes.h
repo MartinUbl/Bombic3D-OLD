@@ -33,6 +33,7 @@ enum Opcodes
     SMSG_MOVE_HEARTHBEAT           = 0x0E,
     SMSG_MAP_OBJECT_DATA           = 0x0F,
     SMSG_NEW_PLAYER                = 0x10,
+    MAX_OPCODE
 };
 
 #endif

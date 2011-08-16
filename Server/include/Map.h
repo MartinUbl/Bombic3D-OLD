@@ -13,6 +13,7 @@ struct cell
     uint16 type;
     uint16 texture;
 };
+typedef std::vector<std::vector<cell>> CellVector;
 
 struct Map
 {
@@ -25,9 +26,12 @@ struct Map
         skybox = 0;
     }
     int MapId;
-    std::vector<std::vector<cell>> field;
+    CellVector field;
     uint16 skybox;
     std::string mapname;
+    uint32 startloc[8]; //x1,y1,x2,y2,x3,y3,x4,y4
+
+    bool IsStartLoc(int32 x, int32 y);
 };
 
 // Vychozi chunk z mapy
@@ -53,6 +57,7 @@ class MapManager
 
         bool Initialize();
         const char* GetMapName(int32 map);
+        Map* GetMap(int32 id);
 
     private:
         bool LoadMap(const char* mappath, Map* dest);

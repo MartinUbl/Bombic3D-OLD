@@ -78,5 +78,42 @@ bool MapManager::LoadMap(const char* mappath, Map* dest)
         dest->field[pChunk->x][pChunk->y].texture = pChunk->texture;
     }
 
+    uint8 counter = 0;
+    // Zaroven si hned vypreparujeme startovni pozice
+    for (uint32 i = 0; i < dest->field.size(); i++)
+    {
+        for (uint32 j = 0; j < dest->field[0].size(); j++)
+        {
+            if (dest->field[i][j].type == 3)
+            {
+                dest->startloc[counter*2+0] = i;
+                dest->startloc[counter*2+1] = j;
+            }
+        }
+    }
+
     return true;
+}
+
+Map* MapManager::GetMap(int32 id)
+{
+    if (id < 0)
+        return NULL;
+
+    if (m_Maps.find(id) == m_Maps.end())
+        return NULL;
+
+    return m_Maps[id];
+}
+
+bool Map::IsStartLoc(int32 x, int32 y)
+{
+    if (x < 0 || y < 0)
+        return false;
+
+    for (int i = 0; i < 4; i++)
+        if (startloc[i*2] == x && startloc[(i*2)+1] == y)
+            return true;
+
+    return false;
 }

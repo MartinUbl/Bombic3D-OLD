@@ -119,6 +119,9 @@ SmartPacket* Network::BuildPacket(const char *buffer, uint32 size)
     //at first, parse opcode ID
     memcpy(&opcode,&buffer[0],sizeof(unsigned int));
 
+    if (opcode >= MAX_OPCODE)
+        return NULL;
+
     SmartPacket* packet = new SmartPacket(opcode);
 
     //next parse size
@@ -133,6 +136,9 @@ SmartPacket* Network::BuildPacket(const char *buffer, uint32 size)
 
 void Network::HandlePacket(SmartPacket *data)
 {
+    if (!data)
+        return;
+
     switch (data->GetOpcode())
     {
         case SMSG_INITIATE_SESSION_RESPONSE:
@@ -209,6 +215,23 @@ void Network::HandlePacket(SmartPacket *data)
             gDisplay.InitModelDisplayList();
             gDisplay.SetGameState(GAME_GAME);
 
+            break;
+        }
+        case SMSG_MAP_OBJECT_DATA:
+        {
+            uint32 count;
+            uint32 tmpx, tmpy;
+            uint8 type;
+
+            *data >> count;
+
+            for (int i = 0; i < count; i++)
+            {
+                *data >> tmpx >> tmpy >> type;
+                // rozbitelna bedna
+                if (type == 1)
+                    gDisplay.DrawModel(tmpx-0.51f,0.0f,tmpy-0.51f,5,ANIM_IDLE,true,0.6f);
+            }
             break;
         }
     }

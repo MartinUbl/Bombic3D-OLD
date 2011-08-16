@@ -32,6 +32,8 @@ void Application::init()
     sLog->StaticOut("---------------------------------");
     sLog->StaticOut("");
 
+    srand ( (unsigned int)time(NULL) );
+
     sLog->StaticOut(">> Loading config...");
     if (!sConfig->LoadConfig("main.conf"))
         abort("Loading config main.conf failed");

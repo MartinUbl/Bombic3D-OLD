@@ -65,6 +65,9 @@ SmartPacket* Session::BuildPacket(const char *buffer, uint32 size)
     //at first, parse opcode ID
     memcpy(&opcode,&buffer[0],sizeof(unsigned int));
 
+    if (opcode >= MAX_OPCODE)
+        return NULL;
+
     SmartPacket* packet = new SmartPacket(opcode);
 
     //next parse size
@@ -133,8 +136,8 @@ void Session::ProcessPacket(SmartPacket* packet, Player* pSource)
             }
 
             // TODO: nacteni start. pozic ze souboru
-            pSource->m_positionX = 3.0f;
-            pSource->m_positionY = 3.0f;
+            pSource->m_positionX = 1.0f;
+            pSource->m_positionY = 1.0f;
 
             SmartPacket response(SMSG_ENTER_GAME_RESULT);
             response << uint8(0); //vsechno ok
@@ -160,6 +163,12 @@ void Session::ProcessPacket(SmartPacket* packet, Player* pSource)
                         SendPacket(pSource, &newpl);
                     }
                 }
+
+                SmartPacket mapdata(SMSG_MAP_OBJECT_DATA);
+                mapdata << uint32(pInstance->m_dynRecords.size());
+                for (std::list<Instance::DynamicRecord>::const_iterator itr = pInstance->m_dynRecords.begin(); itr != pInstance->m_dynRecords.end(); ++itr)
+                    mapdata << uint32((*itr).x) << uint32((*itr).y) << uint8((*itr).type);
+                SendPacket(pSource, &mapdata);
             }
             SmartPacket inotify(SMSG_NEW_PLAYER);
             inotify << uint32(pSource->m_socket);       // ID

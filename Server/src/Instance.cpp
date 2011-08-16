@@ -33,6 +33,8 @@ bool InstanceManager::InitDefaultInstance()
         pNew->maxplayers = 4;
         pNew->players = 0;
 
+        pNew->GenerateRandomDynamicRecords();
+
         m_Instances[0] = pNew;
 
         return true;
@@ -60,6 +62,8 @@ int32 InstanceManager::InitNewInstance()
             pNew->mapId = 1;
             pNew->maxplayers = 4;
             pNew->players = 0;
+
+            pNew->GenerateRandomDynamicRecords();
 
             m_Instances[i] = pNew;
 
@@ -155,5 +159,51 @@ void InstanceManager::SendInstancePacket(SmartPacket *data, uint32 instanceId)
     {
         if (pInstance->pPlayers[i])
             sSession->SendPacket(pInstance->pPlayers[i], data);
+    }
+}
+
+void Instance::GenerateRandomDynamicRecords()
+{
+    Map* myMap = sMapManager->GetMap(mapId);
+    if (!myMap)
+        return;
+
+    m_dynRecords.clear();
+
+    std::list<std::pair<uint32, uint32>> freeSpots;
+    freeSpots.clear();
+
+    uint32 width = myMap->field.size();
+    uint32 height = myMap->field[0].size();
+
+    for (uint32 i = 0; i < width; i++)
+    {
+        for (uint32 j = 0; j < height; j++)
+        {
+            if (myMap->field[i][j].type == 0) // type ground
+            {
+                if (   !myMap->IsStartLoc(i-1,j-1)
+                    && !myMap->IsStartLoc(i-1,j  )
+                    && !myMap->IsStartLoc(i-1,j+1)
+                    && !myMap->IsStartLoc(i+1,j-1)
+                    && !myMap->IsStartLoc(i+1,j  )
+                    && !myMap->IsStartLoc(i+1,j+1)
+                    && !myMap->IsStartLoc(i  ,j-1)
+                    && !myMap->IsStartLoc(i  ,j+1))
+                    freeSpots.push_back(std::make_pair<uint32, uint32>(i,j));
+            }
+        }
+    }
+
+    DynamicRecord temp;
+    for(std::list<std::pair<uint32, uint32>>::const_iterator itr = freeSpots.begin(); itr != freeSpots.end(); ++itr)
+    {
+        if (rand()%2 > 0)
+        {
+            temp.x = (*itr).first;
+            temp.x = (*itr).second;
+            temp.type = 1;
+            m_dynRecords.push_back(temp);
+        }
     }
 }

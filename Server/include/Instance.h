@@ -24,6 +24,15 @@ struct Instance
     uint32 players;
     uint32 maxplayers;
 
+    struct DynamicRecord
+    {
+        uint32 x;
+        uint32 y;
+        uint8 type; // 1 = znicitelna kostka, zatim nic jineho
+    };
+    std::list<DynamicRecord> m_dynRecords;
+    void GenerateRandomDynamicRecords();
+
     Player* pPlayers[MAX_PLAYERS_PER_INSTANCE];
 };
 
