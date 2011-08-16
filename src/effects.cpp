@@ -272,13 +272,21 @@ void Display::AnimWorker()
             temp = *itr;
 
             //Posunout frame animace modelu pri kazdem pokusu o vykresleni
-           if(temp->Animation != ANIM_NONE)
+           if(temp->Animation != ANIM_NONE && !temp->remove)
             {
                 AnimFirst = gDataStore.ModelData[temp->ModelID].AnimData[temp->Animation].first;
                 AnimLast = gDataStore.ModelData[temp->ModelID].AnimData[temp->Animation].second;
                 temp->AnimProgress += 1;
                 if(temp->AnimProgress > gDisplayStore.Models[temp->ModelID].numberOfFrames || temp->AnimProgress > AnimLast)
-                    temp->AnimProgress = AnimFirst;
+                {
+                    if (temp->Animation == ANIM_DISAPPEAR)
+                    {
+                        temp->remove = true;
+                        temp->AnimProgress -= 1;
+                    }
+                    else
+                        temp->AnimProgress = AnimFirst;
+                }
             }
 
             if(temp->AnimProgress == 0)

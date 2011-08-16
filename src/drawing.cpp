@@ -104,6 +104,8 @@ void Display::InitModelDisplayList()
     temp->id = gDisplayStore.GetFreeID(TYPE_MODEL);
     gDisplayStore.ModelDisplayList.push_back(temp);
     PlayerModelListId = gDisplayStore.ModelDisplayList.size()-1;
+
+    DrawModel(4.0f-0.51f,0.0f,1.0f-0.51f,5,ANIM_DISAPPEAR,true,0.6f);
 }
 
 //Aktualizace zobrazeni (v promenne diff ulozen cas od posledni aktualizace)
@@ -569,6 +571,9 @@ void Display::DrawTexts()
     glOrtho(vPort[0], vPort[0]+vPort[2], vPort[1]+vPort[3], vPort[1], -1, 1);
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 
     for(int i = 0; i < gDisplayStore.TextDisplayList.size(); ++i)
     {

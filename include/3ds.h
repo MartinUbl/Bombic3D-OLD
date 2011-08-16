@@ -6,10 +6,11 @@
 
 enum AnimType
 {
-    ANIM_NONE,
+    ANIM_NONE = 0,
     ANIM_IDLE,
     ANIM_WALK,
     ANIM_RUN,
+    ANIM_DISAPPEAR,
 };
 
 //>------ Primary Chunk, at the beginning of each file
