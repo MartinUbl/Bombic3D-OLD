@@ -158,6 +158,12 @@ bool ConnectingClickHandler(unsigned int x, unsigned int y, MouseButton button, 
     {
         SmartPacket data(CMSG_ENTER_GAME);
         data << uint32(pField->store[0]);
+        if (pNickField->active)
+        {
+            // Smazat z konce " |"
+            pNickField->fieldcontent.erase(pNickField->fieldcontent.size()-1);
+            pNickField->fieldcontent.erase(pNickField->fieldcontent.size()-1);
+        }
         data << pNickField->fieldcontent.c_str();
         gNetwork.SendPacket(&data);
     }

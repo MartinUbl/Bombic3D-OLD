@@ -144,6 +144,23 @@ void Session::ProcessPacket(SmartPacket* packet, Player* pSource)
             response << instanceId;
             SendPacket(pSource, &response);
 
+            Instance* pInstance = sInstanceManager->GetPlayerInstance(pSource);
+            if (pInstance)
+            {
+                for (int i = 0; i < MAX_PLAYERS_PER_INSTANCE; i++)
+                {
+                    if (pInstance->pPlayers[i])
+                    {
+                        SmartPacket newpl(SMSG_NEW_PLAYER);
+                        newpl << uint32(pInstance->pPlayers[i]->m_socket);
+                        newpl << pInstance->pPlayers[i]->m_positionX;
+                        newpl << pInstance->pPlayers[i]->m_positionY;
+                        newpl << uint8(pInstance->pPlayers[i]->m_modelIdOffset);
+                        newpl << pInstance->pPlayers[i]->m_nickName.c_str();
+                        SendPacket(pSource, &newpl);
+                    }
+                }
+            }
             SmartPacket inotify(SMSG_NEW_PLAYER);
             inotify << uint32(pSource->m_socket);       // ID
             inotify << pSource->m_positionX;            // pozice X
