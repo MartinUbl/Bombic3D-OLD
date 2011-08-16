@@ -43,7 +43,14 @@ bool MenuClickHandler(unsigned int x, unsigned int y, MouseButton button, bool p
     // Nova Hra
     if ( (x > 90*WIDTH_PCT-340) && (x < 90*WIDTH_PCT) && (y > 10*HEIGHT_PCT) && (y < 10*HEIGHT_PCT+80) )
     {
-        gDisplay.SetGameState(GAME_CONNECTING);
+        gDisplay.SetGameState(GAME_PRECONNECTING);
+        gNetwork.Connect("127.0.0.1",2530);
+        if (gNetwork.IsConnected())
+        {
+            SmartPacket data(CMSG_INITIATE_SESSION);
+            data << uint32(0);
+            gNetwork.SendPacket(&data);
+        }
         return true;
     }
     // Odejit
@@ -54,6 +61,19 @@ bool MenuClickHandler(unsigned int x, unsigned int y, MouseButton button, bool p
     }
 
     return false; // Neosetrili jsme
+}
+
+void PreConnectingDrawHandler()
+{
+    switch(gDisplay.GetGameStateStage())
+    {
+        case 0:
+            gDisplay.DrawText(100,100,"Pøipojování...");
+            break;
+        case 1:
+            gDisplay.DrawText(150,150,"Ovìøování...");
+            break;
+    }
 }
 
 void ConnectingDrawHandler_NicknameField()
@@ -78,8 +98,7 @@ void ConnectingDrawHandler_RoomList()
         return;
 
     // Priklad
-    // TODO: odstranit se sitovanim a ziskavanim mistnosti ze serveru
-    pField->fieldcontent = "1|Ìšèøžýáíé|0/4|Kennny|2|ìŠÈØŽÝÁÍÉ|4/4|Kennny2";
+    //pField->fieldcontent = "1|Jmeno hry 1|0/4|Mapa 1|2|Druha hra|4/4|Mapa 2";
 
     // Priblizne se prepocita podle vysky okna (18 je pro 768px na vysku okna)
     std::vector<string> exploded = explode(pField->fieldcontent.c_str(),'|');
@@ -137,10 +156,9 @@ bool ConnectingClickHandler(unsigned int x, unsigned int y, MouseButton button, 
 
     if (x > 95*WIDTH_PCT-200 && x < 95*WIDTH_PCT && y > 92*HEIGHT_PCT && y < 92*HEIGHT_PCT+40)
     {
-        // TODO:  handling do network vlakna, zde jen poslat packet!
-        gDisplay.FlushModelDisplayList();
-        gDisplay.InitModelDisplayList();
-        gDisplay.SetGameState(GAME_GAME);
+        SmartPacket data(CMSG_ENTER_GAME);
+        data << uint32(pField->store[0]);
+        gNetwork.SendPacket(&data);
     }
 
     return true;
@@ -216,6 +234,19 @@ UIRecord* DHInstall_UIMenu_ExitGame()
     pNew->UIType = UI_TYPE_MENU_BUTTON_EXIT_GAME;
     pNew->DrawHandler = &MenuDrawHandler_ExitGame;
     pNew->ClickHandler = &MenuClickHandler;
+
+    return pNew;
+}
+UIRecord* DHInstall_UIPreConnecting_Info()
+{
+    UIRecord* pNew = new UIRecord;
+
+    pNew->x = 0;
+    pNew->y = 0;
+    pNew->StateRestriction = GAME_PRECONNECTING;
+    pNew->UIType = UI_TYPE_PRECONNECTING_INFO;
+    pNew->DrawHandler = &PreConnectingDrawHandler;
+    //pNew->ClickHandler = &PreConnectingClickHandler;
 
     return pNew;
 }

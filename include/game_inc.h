@@ -68,7 +68,6 @@ using namespace std;
 #include "effects.h"
 #include "timer.h"
 #include "util.h"
-#include <shared.h>
 
 extern HWND hWnd;
 extern HDC hDc;

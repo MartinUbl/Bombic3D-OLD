@@ -239,8 +239,11 @@ int InitGL(GLvoid)
     gInterface.Initialize();
     //Inicializace casovace
     gTimer.Initialize();
+    //Inicializace sitovani
+    gNetwork.Startup();
 
     boost::thread AnimationThread(runAnimWorker);
+    boost::thread NetworkThread(runNetworkWorker);
 
     glEnable(GL_TEXTURE_2D);        //Povoleni texturovani
     glShadeModel(GL_SMOOTH);        //Model shadingu

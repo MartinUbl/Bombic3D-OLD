@@ -102,5 +102,6 @@ void Interface::LoadUI()
     RegisterUIRecord(DHInstall_UIMenu_ExitGame());
     RegisterUIRecord(DHInstall_UIConnecting_NicknameField());
     RegisterUIRecord(DHInstall_UIConnecting_RoomList());
+    RegisterUIRecord(DHInstall_UIPreConnecting_Info());
 }
 

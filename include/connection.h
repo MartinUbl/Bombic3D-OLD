@@ -2,7 +2,9 @@
 #define __CONNECTION_H_
 
 #include <game_inc.h>
-#include <shared.h>
+
+#include "SmartPacket.h"
+
 #include <windows.h>
 #include <winsock.h>
 
@@ -25,6 +27,13 @@ class Network
 
         void Worker();
 
+        void SendPacket(SmartPacket *data);
+        SmartPacket* BuildPacket(const char *buffer, uint32 size);
+        void HandlePacket(SmartPacket *data);
+
+        uint32 GetMyID() { return m_myId; };
+        void SetMyID(uint32 id) { m_myId = id; };
+
     protected:
         bool m_connected;
 
@@ -34,6 +43,13 @@ class Network
         int m_mySocket;
         hostent* m_hostent;
         sockaddr_in m_serverSock;
+
+        uint32 m_myId;
+        uint32 m_myInstanceId;
 };
+
+extern Network gNetwork;
+
+extern void runNetworkWorker();
 
 #endif

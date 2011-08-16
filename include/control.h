@@ -17,6 +17,7 @@ enum UIRecordType
     UI_TYPE_NONE = 0,
     UI_TYPE_MENU_BUTTON_NEW_GAME,
     UI_TYPE_MENU_BUTTON_EXIT_GAME,
+    UI_TYPE_PRECONNECTING_INFO,
     UI_TYPE_CONNECTING_FIELD_NICKNAME,
     UI_TYPE_CONNECTING_FIELD_ROOMS_LIST,
     UI_TYPE_CONNECTING_BUTTON_CONNECT,
@@ -101,6 +102,7 @@ extern UIRecord* DHInstall_UIMenu_NewGame();
 extern UIRecord* DHInstall_UIMenu_ExitGame();
 extern UIRecord* DHInstall_UIConnecting_NicknameField();
 extern UIRecord* DHInstall_UIConnecting_RoomList();
+extern UIRecord* DHInstall_UIPreConnecting_Info();
 
 #endif
 

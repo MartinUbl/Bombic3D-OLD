@@ -41,9 +41,29 @@ void Interface::KeyPress(uint8 key)
         {
             case 'W':
             case 'A':
+            case 'S':
             case 'D':
+            {
                 gDisplay.SetPlayerAnim(ANIM_WALK);
+                SmartPacket data(CMSG_MOVE_START);
+
+                // 1 dopredu, 2 dozadu, 3 doleva, 4 doprava
+
+                if (key == 'W')
+                    data << uint8(1);
+                else if (key == 'A')
+                    data << uint8(3);
+                else if (key == 'D')
+                    data << uint8(4);
+                else if (key == 'S')
+                    data << uint8(2);
+
+                data << gDisplay.GetViewX();
+                data << gDisplay.GetViewZ();
+                data << gDisplay.GetHAngle();
+                gNetwork.SendPacket(&data);
                 break;
+            }
             default:
                 break;
         }
@@ -70,10 +90,31 @@ void Interface::KeyRelease(uint8 key)
         {
             case 'W':
             case 'A':
+            case 'S':
             case 'D':
-                if(!keys['W'] && !keys['A'] && !keys['D'])
+            {
+                if(!keys['W'] && !keys['A'] && !keys['D'] && !keys['S'])
                     gDisplay.SetPlayerAnim(ANIM_IDLE);
+
+                SmartPacket data(CMSG_MOVE_STOP);
+
+                // 1 dopredu, 2 dozadu, 3 doleva, 4 doprava
+
+                if (key == 'W')
+                    data << uint8(1);
+                else if (key == 'A')
+                    data << uint8(3);
+                else if (key == 'D')
+                    data << uint8(4);
+                else if (key == 'S')
+                    data << uint8(2);
+
+                data << gDisplay.GetViewX();
+                data << gDisplay.GetViewZ();
+                gNetwork.SendPacket(&data);
+
                 break;
+            }
             default:
                 break;
         }

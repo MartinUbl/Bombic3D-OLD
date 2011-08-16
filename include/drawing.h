@@ -42,6 +42,7 @@ enum GameState
     GAME_NONE = 0,
     GAME_INTRO,
     GAME_MENU,
+    GAME_PRECONNECTING,
     GAME_CONNECTING,
     GAME_LOADING,
     GAME_GAME,

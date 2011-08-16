@@ -116,6 +116,7 @@ void Display::DoTick()
         case GAME_MENU:
             DrawMenu();
             break;
+        case GAME_PRECONNECTING:
         case GAME_CONNECTING:
             DrawConnecting();
             break;
