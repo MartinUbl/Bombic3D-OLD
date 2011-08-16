@@ -119,29 +119,29 @@ bool ConnectingClickHandler(unsigned int x, unsigned int y, MouseButton button, 
     if (!press)
         return false;
 
-    UIRecord* pField = gInterface.GetUIRecordByType(UI_TYPE_CONNECTING_FIELD_NICKNAME);
-    if (!pField)
+    UIRecord* pNickField = gInterface.GetUIRecordByType(UI_TYPE_CONNECTING_FIELD_NICKNAME);
+    if (!pNickField)
         return false;
 
     if (x > 20 && x < 20+500 && y > 20 && y < 20+80)
     {
-        if (!pField->active)
+        if (!pNickField->active)
         {
-            pField->active = true;
-            pField->fieldcontent.append(" |");
+            pNickField->active = true;
+            pNickField->fieldcontent.append(" |");
         }
     }
     else
     {
-        if (pField->active)
+        if (pNickField->active)
         {
-            pField->fieldcontent.erase(pField->fieldcontent.size()-1);
-            pField->fieldcontent.erase(pField->fieldcontent.size()-1);
-            pField->active = false;
+            pNickField->fieldcontent.erase(pNickField->fieldcontent.size()-1);
+            pNickField->fieldcontent.erase(pNickField->fieldcontent.size()-1);
+            pNickField->active = false;
         }
     }
 
-    pField = gInterface.GetUIRecordByType(UI_TYPE_CONNECTING_FIELD_ROOMS_LIST);
+    UIRecord* pField = gInterface.GetUIRecordByType(UI_TYPE_CONNECTING_FIELD_ROOMS_LIST);
     if (!pField)
         return false;
 
@@ -158,6 +158,7 @@ bool ConnectingClickHandler(unsigned int x, unsigned int y, MouseButton button, 
     {
         SmartPacket data(CMSG_ENTER_GAME);
         data << uint32(pField->store[0]);
+        data << pNickField->fieldcontent.c_str();
         gNetwork.SendPacket(&data);
     }
 

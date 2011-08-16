@@ -58,6 +58,9 @@ struct Client
     ADDRLEN m_addrLen;
 };
 
+#include "Player.h"
+struct Player;
+
 class Session
 {
     public:
@@ -74,10 +77,12 @@ class Session
         void SendPacket(Client* pClient, SmartPacket* data);
         void SendPacket(SOCK socket, SmartPacket* data);
 
-        void ProcessPacket(SmartPacket* packet, Client* pSource);
+        void ProcessPacket(SmartPacket* packet, Player* pSource);
+
+        Player* GetPlayerByName(const char* name);
 
     protected:
-        std::list<Client*> clientList;
+        std::list<Player*> clientList;
 
         SOCK m_socket;
         int m_port;

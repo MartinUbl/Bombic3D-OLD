@@ -11,5 +11,9 @@ Player::Player() : Client()
     m_positionY = 0.0f;
     m_orientation = 0.0f;
 
+    m_modelIdOffset = 0;
+
+    m_nickName = "ABCDEFGH";
+
     m_isMoving = false;
 }

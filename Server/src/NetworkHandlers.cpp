@@ -17,7 +17,7 @@ void Session::BroadcastPacket(SmartPacket* data)
     if (clientList.empty())
         return;
 
-    for (std::list<Client*>::const_iterator itr = clientList.begin(); itr != clientList.end(); ++itr)
+    for (std::list<Player*>::const_iterator itr = clientList.begin(); itr != clientList.end(); ++itr)
         SendPacket((*itr)->m_socket, data);
 }
 
@@ -77,7 +77,7 @@ SmartPacket* Session::BuildPacket(const char *buffer, uint32 size)
     return packet;
 }
 
-void Session::ProcessPacket(SmartPacket* packet, Client* pSource)
+void Session::ProcessPacket(SmartPacket* packet, Player* pSource)
 {
     switch(packet->GetOpcode())
     {
@@ -109,18 +109,48 @@ void Session::ProcessPacket(SmartPacket* packet, Client* pSource)
         case CMSG_ENTER_GAME:
         {
             uint32 instanceId;
+            std::string nickname;
 
             *packet >> instanceId;
+            nickname = packet->readstr();
 
-            // TODO: zaregistrovat hrace do instance
+            if (sSession->GetPlayerByName(nickname.c_str()))
+            {
+                SmartPacket response(SMSG_ENTER_GAME_RESULT);
+                response << uint8(1); //error - nick uz ma nekdo jiny
+                SendPacket(pSource, &response);
+            }
+
+            pSource->m_nickName = nickname;
+
+            sInstanceManager->RegisterPlayer(pSource, instanceId);
+            if (sInstanceManager->GetPlayerInstanceId(pSource) != instanceId)
+            {
+                SmartPacket response(SMSG_ENTER_GAME_RESULT);
+                response << uint8(2); //error - nelze pridat do instance
+                SendPacket(pSource, &response);
+                return;
+            }
+
+            // TODO: nacteni start. pozic ze souboru
+            pSource->m_positionX = 3.0f;
+            pSource->m_positionY = 3.0f;
 
             SmartPacket response(SMSG_ENTER_GAME_RESULT);
             response << uint8(0); //vsechno ok
-            response << float(1); // startovni pozice X
-            response << float(1); // startovni pozice Y (klientsky Z)
-            response << uint32(pSource->m_socket); // jako ID pouzijeme socket ID
+            response << float(pSource->m_positionX); // startovni pozice X
+            response << float(pSource->m_positionY); // startovni pozice Y (klientsky Z)
+            response << uint32(pSource->m_socket);   // jako ID pouzijeme socket ID
             response << instanceId;
             SendPacket(pSource, &response);
+
+            SmartPacket inotify(SMSG_NEW_PLAYER);
+            inotify << uint32(pSource->m_socket);       // ID
+            inotify << pSource->m_positionX;            // pozice X
+            inotify << pSource->m_positionY;            // pozice Y
+            inotify << uint8(pSource->m_modelIdOffset); // offset modelu, klient si s tim poradi
+            inotify << nickname.c_str();                // nick
+            sInstanceManager->SendInstancePacket(&inotify, instanceId);
             break;
         }
         case MSG_NONE:

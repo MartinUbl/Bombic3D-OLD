@@ -24,8 +24,12 @@ struct Player: public Client
 
     bool m_isMoving;
 
+    uint8 m_modelIdOffset;
+
     // Pocitadlo pro kazdy bonus - kolikrat byl sebran
     uint8 m_bonuses[MAX_BONUSES];
+
+    std::string m_nickName;
 };
 
 #endif

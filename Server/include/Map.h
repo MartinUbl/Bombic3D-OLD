@@ -58,7 +58,6 @@ class MapManager
         bool LoadMap(const char* mappath, Map* dest);
 
         std::map<uint32, Map*> m_Maps;
-        std::vector<Player*> m_Players;
 };
 
 static MapManager* sMapManager = Singleton<MapManager>::Instance();

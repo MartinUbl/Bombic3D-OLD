@@ -27,6 +27,7 @@ bool InstanceManager::InitDefaultInstance()
         if (!pNew)
             return false;
 
+        pNew->id = 0;
         pNew->instanceName = "Default Instance";
         pNew->mapId = 1;
         pNew->maxplayers = 4;
@@ -54,6 +55,7 @@ int32 InstanceManager::InitNewInstance()
 
             sprintf(instname, "Instance %i", i);
 
+            pNew->id = i;
             pNew->instanceName = instname;
             pNew->mapId = 1;
             pNew->maxplayers = 4;
@@ -95,4 +97,63 @@ const char* InstanceManager::GetInstanceString()
     pRet[retstr.size()] = '\0';
 
     return pRet;
+}
+
+void InstanceManager::RegisterPlayer(Player *pPlayer, uint32 instanceId)
+{
+    Instance* pInstance = m_Instances[instanceId];
+    if (!pInstance)
+        return;
+
+    if (pInstance->players >= pInstance->maxplayers)
+        return;
+
+    for (int i = 0; i < MAX_PLAYERS_PER_INSTANCE; i++)
+    {
+        if (!pInstance->pPlayers[i])
+        {
+            pInstance->pPlayers[i] = pPlayer;
+            pInstance->players += 1;
+            pPlayer->m_modelIdOffset = i;
+            return;
+        }
+    }
+}
+
+Instance* InstanceManager::GetPlayerInstance(Player *pPlayer)
+{
+    if (!pPlayer)
+        return NULL;
+
+    for (std::map<uint32, Instance*>::iterator itr = m_Instances.begin(); itr != m_Instances.end(); ++itr)
+    {
+        for (int i = 0; i < MAX_PLAYERS_PER_INSTANCE; i++)
+        {
+            if (itr->second->pPlayers[i] == pPlayer)
+                return itr->second;
+        }
+    }
+
+    return NULL;
+}
+
+int32 InstanceManager::GetPlayerInstanceId(Player *pPlayer)
+{
+    if (Instance* pInstance = GetPlayerInstance(pPlayer))
+        return pInstance->id;
+    else
+        return -1;
+}
+
+void InstanceManager::SendInstancePacket(SmartPacket *data, uint32 instanceId)
+{
+    Instance* pInstance = m_Instances[instanceId];
+    if (!pInstance)
+        return;
+
+    for (int i = 0; i < MAX_PLAYERS_PER_INSTANCE; i++)
+    {
+        if (pInstance->pPlayers[i])
+            sSession->SendPacket(pInstance->pPlayers[i], data);
+    }
 }

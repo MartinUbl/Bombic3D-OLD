@@ -68,8 +68,8 @@ void Session::Worker()
 
     char* buf = new char[BUFFER_LEN];
     int result, error;
-    Client* pClient = NULL;
-    std::list<Client*>::iterator itr;
+    Player* pClient = NULL;
+    std::list<Player*>::iterator itr;
 
     while(1)
     {
@@ -129,7 +129,7 @@ void Session::Acceptor()
 
     int res, error;
 
-    Client* pNew = new Client;
+    Player* pNew = new Player;
     pNew->m_addrLen = sizeof(pNew->m_sockInfo);
     SOCK result;
 
@@ -166,7 +166,7 @@ void Session::Acceptor()
             clientList.push_back(pNew);
             sLog->NetworkOut(pNew,"Inserted into client list");
 
-            pNew = new Client;
+            pNew = new Player;
             pNew->m_addrLen = sizeof(pNew->m_sockInfo);
         }
 
@@ -178,4 +178,18 @@ void Session::Acceptor()
 void runSessionAcceptor()
 {
     sSession->Acceptor();
+}
+
+Player* Session::GetPlayerByName(const char* name)
+{
+    if (!name)
+        return NULL;
+
+    for (std::list<Player*>::iterator itr = clientList.begin(); itr != clientList.end(); ++itr)
+    {
+        if (mstrcmp((*itr)->m_nickName.c_str(), name) == 0)
+            return (*itr);
+    }
+
+    return NULL;
 }
