@@ -260,3 +260,37 @@ void TextureAnimationMgr::Update(const clock_t diff)
     // Prostor pro dalsi druhy animace (v budoucnu i floor textury)
 }
 
+void Display::AnimWorker()
+{
+    uint32 AnimFirst, AnimLast;
+    ModelDisplayListRecord* temp;
+
+    while(1)
+    {
+        for(std::vector<ModelDisplayListRecord*>::iterator itr = gDisplayStore.ModelDisplayList.begin(); itr != gDisplayStore.ModelDisplayList.end(); ++itr)
+        {
+            temp = *itr;
+
+            //Posunout frame animace modelu pri kazdem pokusu o vykresleni
+           if(temp->Animation != ANIM_NONE)
+            {
+                AnimFirst = gDataStore.ModelData[temp->ModelID].AnimData[temp->Animation].first;
+                AnimLast = gDataStore.ModelData[temp->ModelID].AnimData[temp->Animation].second;
+                temp->AnimProgress += 1;
+                if(temp->AnimProgress > gDisplayStore.Models[temp->ModelID].numberOfFrames || temp->AnimProgress > AnimLast)
+                    temp->AnimProgress = AnimFirst;
+            }
+
+            if(temp->AnimProgress == 0)
+                temp->AnimProgress = 1;
+        }
+
+        boost::this_thread::sleep(boost::posix_time::milliseconds(1));
+    }
+}
+
+void runAnimWorker()
+{
+    gDisplay.AnimWorker();
+}
+

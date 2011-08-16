@@ -1,5 +1,6 @@
 #include <game_inc.h>
 #include <math.h>
+#include <boost/date_time.hpp>
 
 #define MODPOS_X ((GLfloat)sin(h_angle*(PI/180)) * PLAYER_VIEW_DISTANCE)
 #define MODPOS_Z ((GLfloat)cos(h_angle*(PI/180)) * PLAYER_VIEW_DISTANCE)
@@ -441,7 +442,6 @@ void Display::DrawModels()
 {
     float x,y,z;
     ModelDisplayListRecord* temp = NULL;
-    uint32 AnimFirst, AnimLast;
 
     for(std::vector<ModelDisplayListRecord*>::iterator itr = gDisplayStore.ModelDisplayList.begin(); itr != gDisplayStore.ModelDisplayList.end(); ++itr)
     {
@@ -469,19 +469,6 @@ void Display::DrawModels()
         glRotatef(temp->rotate,0.0f,1.0f,0.0f);
 
         t3DModel* pModel = &gDisplayStore.Models[temp->ModelID];
-
-        //Posunout frame animace modelu pri kazdem pokusu o vykresleni
-        if(temp->Animation != ANIM_NONE)
-        {
-            AnimFirst = gDataStore.ModelData[temp->ModelID].AnimData[temp->Animation].first;
-            AnimLast = gDataStore.ModelData[temp->ModelID].AnimData[temp->Animation].second;
-            temp->AnimProgress += 1+(uint32(m_diff)/2);
-            if(temp->AnimProgress > pModel->numberOfFrames || temp->AnimProgress > AnimLast)
-                temp->AnimProgress = AnimFirst;
-        }
-
-        if(temp->AnimProgress == 0)
-            temp->AnimProgress = 1;
 
         for(int i = 0; i < pModel->numOfObjects; i++)
         {

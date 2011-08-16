@@ -88,6 +88,8 @@ struct Map
     std::string mapname;
 };
 
+extern void runAnimWorker();
+
 //Hlavni trida zobrazeni
 class Display
 {
@@ -117,6 +119,9 @@ public:
     GLfloat GetViewX() { return view_x; }
     GLfloat GetViewY() { return view_y; }
     GLfloat GetViewZ() { return view_z; }
+
+    //Worker funkce pro vlakno animaci
+    void AnimWorker();
 
     //Manazer mapy
     bool LoadMap(const char* MapFilename);

@@ -240,6 +240,8 @@ int InitGL(GLvoid)
     //Inicializace casovace
     gTimer.Initialize();
 
+    boost::thread AnimationThread(runAnimWorker);
+
     glEnable(GL_TEXTURE_2D);        //Povoleni texturovani
     glShadeModel(GL_SMOOTH);        //Model shadingu
     glClearColor(0.0f, 0.0f, 1.0f, 0.0f);    //Barva pozadi (default, zde modra)

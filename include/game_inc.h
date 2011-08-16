@@ -24,6 +24,7 @@
 #include <algorithm>
 #include <SDL.h>
 #include <SDL_net.h>
+#include <boost/thread.hpp>
 
 //Definice nejpouzivanejsich typu
 //Inspirace z emulatoru MaNGOS
@@ -48,6 +49,7 @@ using namespace std;
 
 #pragma warning (disable:4996) //"fopen","fscanf",... may be unsafe
 #pragma warning (disable:4018) //signed/unsigned mismatch
+#pragma warning (disable:4244) //conversion from X to Y, possible loss of data
 #pragma warning (disable:4068) //unknown pragma
 
 #define DEF_WINDOW_WIDTH 800  //Vychozi sirka okna
