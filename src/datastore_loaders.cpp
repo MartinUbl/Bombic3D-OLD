@@ -72,6 +72,8 @@ bool DataStore::LoadModelData()
 
     //Nacteni dat animaci
     uint32 modelid;
+    AnimData_t_s tmpanim;
+    AnimType type;
 
     q.get_result("select * from model_animation");
 
@@ -80,10 +82,12 @@ bool DataStore::LoadModelData()
 
     while (q.fetch_row())
     {
+        tmpanim.interval = q.getval();
         modelid = q.getval();
-        AnimType type = (AnimType)q.getval();
-        ModelData[modelid].AnimData[type].first = (uint32)q.getval();
-        ModelData[modelid].AnimData[type].second = (uint32)q.getval();
+        type = (AnimType)q.getval();
+        tmpanim.first = (uint32)q.getval();
+        tmpanim.last = (uint32)q.getval();
+        ModelData[modelid].AnimData[type] = tmpanim;
     }
     q.free_result();
 

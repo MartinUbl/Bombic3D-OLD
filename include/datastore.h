@@ -3,9 +3,17 @@
 
 #include <game_inc.h>
 
+//Struktura animacnich dat
+struct AnimData_t_s
+{
+    uint32 first;    // Prvni frame
+    uint32 last;     // Posledni frame
+    uint32 interval; // Interval mezi nimi
+};
+
 //Data o animaci modelu
-//               typ animace        ,prvni frame ,posledni frame
-typedef std::map<AnimType, std::pair<uint32,uint32>> AnimData_t;
+//               typ animace        ,struktura
+typedef std::map<AnimType, AnimData_t_s> AnimData_t;
 
 //Sablona pro ID a jmena souboru textur + deklarovani typu pro snazsi orientaci
 struct TextureDataStore_t

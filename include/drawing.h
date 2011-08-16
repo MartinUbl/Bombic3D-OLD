@@ -214,11 +214,12 @@ enum DisplayListTypes
 //struktura zaznamu display listu modelu
 struct ModelDisplayListRecord
 {
-    ModelDisplayListRecord() { remove = false; }
+    ModelDisplayListRecord() { remove = false; AnimPassedInterval = 0; }
     GLfloat x,y,z;
     uint32 ModelID;
     AnimType Animation;
     uint32 AnimProgress;
+    uint32 AnimPassedInterval;
 
     bool collision;
     float scale, rotate;

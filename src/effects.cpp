@@ -262,7 +262,7 @@ void TextureAnimationMgr::Update(const clock_t diff)
 
 void Display::AnimWorker()
 {
-    uint32 AnimFirst, AnimLast;
+    uint32 AnimFirst, AnimLast, AnimInterval;
     ModelDisplayListRecord* temp;
 
     while(1)
@@ -272,10 +272,19 @@ void Display::AnimWorker()
             temp = *itr;
 
             //Posunout frame animace modelu pri kazdem pokusu o vykresleni
-           if(temp->Animation != ANIM_NONE && !temp->remove)
+            if(temp->Animation != ANIM_NONE && !temp->remove)
             {
                 AnimFirst = gDataStore.ModelData[temp->ModelID].AnimData[temp->Animation].first;
-                AnimLast = gDataStore.ModelData[temp->ModelID].AnimData[temp->Animation].second;
+                AnimLast = gDataStore.ModelData[temp->ModelID].AnimData[temp->Animation].last;
+                AnimInterval = gDataStore.ModelData[temp->ModelID].AnimData[temp->Animation].interval;
+
+                temp->AnimPassedInterval += 1;
+
+                if (temp->AnimPassedInterval < AnimInterval)
+                    continue;
+
+                temp->AnimPassedInterval = 0;
+
                 temp->AnimProgress += 1;
                 if(temp->AnimProgress > gDisplayStore.Models[temp->ModelID].numberOfFrames || temp->AnimProgress > AnimLast)
                 {
