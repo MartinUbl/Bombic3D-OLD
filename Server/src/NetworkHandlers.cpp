@@ -147,6 +147,8 @@ void Session::ProcessPacket(SmartPacket* packet, Player* pSource)
             response << instanceId;
             SendPacket(pSource, &response);
 
+            SmartPacket mapdata(SMSG_MAP_INITIAL_DATA);
+
             Instance* pInstance = sInstanceManager->GetPlayerInstance(pSource);
             if (pInstance)
             {
@@ -154,17 +156,22 @@ void Session::ProcessPacket(SmartPacket* packet, Player* pSource)
                 {
                     if (pInstance->pPlayers[i])
                     {
-                        SmartPacket newpl(SMSG_NEW_PLAYER);
-                        newpl << uint32(pInstance->pPlayers[i]->m_socket);
-                        newpl << pInstance->pPlayers[i]->m_positionX;
-                        newpl << pInstance->pPlayers[i]->m_positionY;
-                        newpl << uint8(pInstance->pPlayers[i]->m_modelIdOffset);
-                        newpl << pInstance->pPlayers[i]->m_nickName.c_str();
-                        SendPacket(pSource, &newpl);
+                        mapdata << uint32(pInstance->pPlayers[i]->m_socket);
+                        mapdata << pInstance->pPlayers[i]->m_positionX;
+                        mapdata << pInstance->pPlayers[i]->m_positionY;
+                        mapdata << uint8(pInstance->pPlayers[i]->m_modelIdOffset);
+                        mapdata << pInstance->pPlayers[i]->m_nickName.c_str();
+                    }
+                    else
+                    {
+                        mapdata << uint32(0);
+                        mapdata << float(0);
+                        mapdata << float(0);
+                        mapdata << uint8(0);
+                        mapdata << "UNKNOWN";
                     }
                 }
 
-                SmartPacket mapdata(SMSG_MAP_OBJECT_DATA);
                 mapdata << uint32(pInstance->m_dynRecords.size());
                 for (std::list<Instance::DynamicRecord>::const_iterator itr = pInstance->m_dynRecords.begin(); itr != pInstance->m_dynRecords.end(); ++itr)
                     mapdata << uint32((*itr).x) << uint32((*itr).y) << uint8((*itr).type);

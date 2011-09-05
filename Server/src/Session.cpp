@@ -11,6 +11,7 @@
 #include "Log.h"
 #include "Application.h"
 #include "Config.h"
+#include "Instance.h"
 
 #include <boost/thread.hpp>
 #include <boost/date_time.hpp>
@@ -97,6 +98,7 @@ void Session::Worker()
                 else if (result == 0 || error == SOCKETCONNRESET)
                 {
                     sLog->NetworkOut(pClient,"Client disconnected");
+                    sInstanceManager->RemovePlayerFromInstances(pClient);
                     itr = clientList.erase(itr);
                     continue;
                 }

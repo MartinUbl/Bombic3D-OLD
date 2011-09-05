@@ -20,37 +20,15 @@ Display::Display()
 
     PlayerModelId = PLAYER_DEFAULT_MODELID;
     PlayerModelListId = 0;
+
+    m_modelDisplayListContainer = true;
 }
 
 //Inicializace display class, volana v main vlakne
 void Display::Initialize()
 {
-    //Docasne natvrdo zadane mapy, pozdeji nacteni podle aktualni pozice
-    char loadmap[256];
-    sprintf(loadmap,"%s/001.bm",DATA_PATH);
-    if(LoadMap(loadmap))
-    {
-        actmap.MapId = 1; //TODO: priradit mapam ID
-        gDisplayStore.FillCustomNeededData();
-        gDisplayStore.LoadFloorTextures();
-        gDisplayStore.LoadModels();
-        gDisplayStore.LoadModelTextures();
-        FlushModelDisplayList();
-        InitModelDisplayList();
-
-        //TEMP, inicializovat az se sitovou hrou
-        //if (actmap.StartLoc[0] && actmap.StartLoc[1])
-        //{
-            view_x = -(float(1-1)*MAP_SCALE_X+0.15f);
-            view_z = -(float(1-1)*MAP_SCALE_Z+0.15f);
-        //}
-    } else {
-        MessageBox(hWnd,"Nepovedlo se naèíst mapu","Error",0);
-        exit(0);
-    }
-
     SetGameState(GAME_MENU);
-    DrawModel(0.2f,-5,0,4,ANIM_IDLE,true, 2.0f);
+    //DrawModel(0.2f,-5,0,4,ANIM_IDLE,true, 2.0f);
 
     //Pracovni emitter, vymazat po doladeni
     //gEmitterMgr.AddEmitter(-view_x,-view_y,-view_z,0,2,0,1,3,0.3f,0.5f,3,6,10000,10000,1000,10,false,EMIT_FLAG_RANDOM_ROTATE);
@@ -66,51 +44,141 @@ void Display::Initialize()
     //DrawBillboard(2.5f,2,2.5f,3,1,3,true);
 }
 
+void Display::LoadState()
+{
+    //Sleep(500);
+    gDisplayStore.NeededFloorTextures.clear();
+    gDisplayStore.NeededModels.clear();
+    gDisplayStore.NeededModelTextures.clear();
+    gDisplayStore.Models.clear();
+    gDisplayStore.ModelTextureFilenames.clear();
+    gDisplayStore.ModelTextures.clear();
+    gDisplayStore.TextureMaterialAssign.clear();
+    gDisplayStore.BillboardDisplayList.clear();
+
+    gDisplayStore.FillCustomNeededData();
+
+    if (m_gameState == GAME_GAME)
+    {
+        //Docasne natvrdo zadane mapy, pozdeji nacteni podle aktualni pozice
+        char loadmap[256];
+        sprintf(loadmap,"%s/001.bm",DATA_PATH);
+        if(LoadMap(loadmap))
+        {
+            actmap.MapId = 1; //TODO: priradit mapam ID
+
+            //TEMP, inicializovat az se sitovou hrou
+            //if (actmap.StartLoc[0] && actmap.StartLoc[1])
+            //{
+                view_x = -(float(1-1)*MAP_SCALE_X+0.15f);
+                view_z = -(float(1-1)*MAP_SCALE_Z+0.15f);
+            //}
+        } else {
+            MessageBox(hWnd,"Nepovedlo se naèíst mapu","Error",0);
+            exit(0);
+        }
+    }
+
+    if (m_gameState >= GAME_MENU && m_gameState <= GAME_CONNECTING)
+    {
+        view_x = -0.15f;
+        view_z = -0.15f;
+    }
+
+    gDisplayStore.LoadFloorTextures();
+    gDisplayStore.LoadModels();
+    gDisplayStore.LoadModelTextures();
+
+    if (m_gameStateStage != 255)
+    {
+        FlushModelDisplayList();
+        InitModelDisplayList();
+    }
+}
+
 void DisplayStore::FillCustomNeededData()
 {
-    NeededFloorTextures.push_back(3);
-    NeededFloorTextures.push_back(4);
-    NeededFloorTextures.push_back(11);
-    NeededFloorTextures.push_back(12);
-    NeededFloorTextures.push_back(13);
-    NeededFloorTextures.push_back(14);
-    NeededFloorTextures.push_back(15);
-    NeededFloorTextures.push_back(16);
-    NeededFloorTextures.push_back(17);
+    GameState gstate = gDisplay.GetGameState();
+    uint8 gstatestage = gDisplay.GetGameStateStage();
 
-    // Skybox - odstranit s podporou dynamickeho nacitani obsahu
-    NeededFloorTextures.push_back(5);
-    NeededFloorTextures.push_back(6);
-    NeededFloorTextures.push_back(7);
-    NeededFloorTextures.push_back(8);
-    NeededFloorTextures.push_back(9);
-    NeededFloorTextures.push_back(10);
+    if (gstate == GAME_GAME)
+    {
+        // transparency test
+        NeededFloorTextures.push_back(3);
+
+        // Skybox - odstranit s podporou dynamickeho nacitani obsahu
+        NeededFloorTextures.push_back(5);
+        NeededFloorTextures.push_back(6);
+        NeededFloorTextures.push_back(7);
+        NeededFloorTextures.push_back(8);
+        NeededFloorTextures.push_back(9);
+        NeededFloorTextures.push_back(10);
+        // konec skyboxu
+    }
+
+    if (gstate == GAME_MENU)
+    {
+        NeededModels.push_back(4);          // menu scene
+        NeededFloorTextures.push_back(4);   // Nova hra
+        NeededFloorTextures.push_back(11);  // Odejit
+    }
+
+    if (gstate == GAME_CONNECTING || gstate == GAME_PRECONNECTING)
+    {
+        NeededModels.push_back(4);          // menu scene
+        NeededFloorTextures.push_back(12);  // nickname
+        NeededFloorTextures.push_back(13);  // label rooms
+        NeededFloorTextures.push_back(16);  // button connect
+    }
+
+    // Label pro texty
+    NeededFloorTextures.push_back(14); // cervene pole, 40% alpha
+    NeededFloorTextures.push_back(15); // modre pole, 40% alpha
+    // Fonty, nacist vzdy
+    NeededFloorTextures.push_back(17); // main font
 }
 
 //Inicializace display listu pro aktualni mapu a umisteni
 void Display::InitModelDisplayList()
 {
-    //Pridani modelu hrace do display listu + ulozeni jeho pozice ve vektoru
-    ModelDisplayListRecord* temp = new ModelDisplayListRecord;
-    temp->ModelID = PlayerModelId;
-    temp->x = ( -view_x                           )/MAP_SCALE_X;
-    temp->y = ( -view_y - DEFAULT_MIN_VIEW_HEIGHT )/MAP_SCALE_Y;
-    temp->z = ( -view_z                           )/MAP_SCALE_Z;
-    temp->collision = false;
-    temp->scale = 0.3f;
-    temp->rotate = 0.0f;
-    temp->Animation = ANIM_IDLE;
-    temp->AnimProgress = gDataStore.ModelData[PlayerModelId].AnimData[ANIM_IDLE].first;
-    temp->id = gDisplayStore.GetFreeID(TYPE_MODEL);
-    gDisplayStore.ModelDisplayList.push_back(temp);
-    PlayerModelListId = gDisplayStore.ModelDisplayList.size()-1;
+    if (m_gameState == GAME_GAME)
+    {
+        //Pridani modelu hrace do display listu + ulozeni jeho pozice ve vektoru
+        ModelDisplayListRecord* temp = new ModelDisplayListRecord;
+        temp->ModelID = PlayerModelId;
+        temp->x = ( -view_x                           )/MAP_SCALE_X;
+        temp->y = ( -view_y - DEFAULT_MIN_VIEW_HEIGHT )/MAP_SCALE_Y;
+        temp->z = ( -view_z                           )/MAP_SCALE_Z;
+        temp->collision = false;
+        temp->scale = 0.3f;
+        temp->rotate = 0.0f;
+        temp->Animation = ANIM_IDLE;
+        temp->AnimProgress = gDataStore.ModelData[PlayerModelId].AnimData[ANIM_IDLE].first;
+        temp->id = gDisplayStore.GetFreeID(TYPE_MODEL);
+        gDisplayStore.ModelDisplayList.push_back(temp);
+        PlayerModelListId = gDisplayStore.ModelDisplayList.size()-1;
+    }
 
-    DrawModel(4.0f-0.51f,0.0f,1.0f-0.51f,5,ANIM_DISAPPEAR,true,0.6f);
+    //DrawModel(4.0f-0.51f,0.0f,1.0f-0.51f,5,ANIM_IDLE,true,0.6f);
+
+    if (m_gameState >= GAME_MENU && m_gameState <= GAME_CONNECTING)
+    {
+        DrawModel(0.2f,-5,0,4,ANIM_NONE,true, 2.0f);
+    }
 }
 
 //Aktualizace zobrazeni (v promenne diff ulozen cas od posledni aktualizace)
 void Display::DoTick()
 {
+    if (m_gameStateStage == 255)
+    {
+        LoadState();
+        /*gDisplayStore.LoadFloorTextures();
+        gDisplayStore.LoadModels();
+        gDisplayStore.LoadModelTextures();*/
+        m_gameStateStage = 0;
+    }
+
     switch (m_gameState)
     {
         case GAME_MENU:
@@ -120,8 +188,17 @@ void Display::DoTick()
         case GAME_CONNECTING:
             DrawConnecting();
             break;
+        case GAME_LOADING:
+            DrawText(50,50,"Naèítám...");
+            if (gDisplayStore.HasDLToken(DL_TOKEN_MAINTHREAD))
+                gDisplayStore.NextDLToken();
+            break;
         case GAME_GAME:
             DrawGame();
+            break;
+        default:
+            if (gDisplayStore.HasDLToken(DL_TOKEN_MAINTHREAD))
+                gDisplayStore.NextDLToken();
             break;
     }
 
@@ -425,6 +502,12 @@ void DisplayStore::RemoveDisplayRecord(uint32 id)
 //Vykresli model modelid na souradnice x,y,z
 ModelDisplayListRecord* Display::DrawModel(float x, float y, float z, uint32 modelid, AnimType Animation, bool collision, float scale, float rotate)
 {
+    while(!m_modelDisplayListContainer)
+    {
+    }
+
+    m_modelDisplayListContainer = false;
+
     ModelDisplayListRecord* temp = new ModelDisplayListRecord;
     temp->ModelID = modelid;
     temp->x = x;
@@ -438,6 +521,8 @@ ModelDisplayListRecord* Display::DrawModel(float x, float y, float z, uint32 mod
     temp->id = gDisplayStore.GetFreeID(TYPE_MODEL);
     gDisplayStore.ModelDisplayList.push_back(temp);
 
+    m_modelDisplayListContainer = true;
+
     return temp;
 }
 
@@ -446,8 +531,15 @@ void Display::DrawModels()
     float x,y,z;
     ModelDisplayListRecord* temp = NULL;
 
+    while(!gDisplayStore.HasDLToken(DL_TOKEN_MAINTHREAD))
+    {
+    }
+
     for(std::vector<ModelDisplayListRecord*>::iterator itr = gDisplayStore.ModelDisplayList.begin(); itr != gDisplayStore.ModelDisplayList.end(); ++itr)
     {
+        if (!itr._Has_container())
+            continue;
+
         temp = *itr;
 
         if (temp->remove)
@@ -460,6 +552,9 @@ void Display::DrawModels()
         x = temp->x*MAP_SCALE_X;
         y = temp->y*MAP_SCALE_Y;
         z = temp->z*MAP_SCALE_Z;
+
+        if (pythagoras_c(fabs(fabs(x)-fabs(view_x)),fabs(fabs(z)-fabs(view_z))) > 2.0f)
+            continue;
 
         glLoadIdentity();
 
@@ -532,6 +627,8 @@ void Display::DrawModels()
             glPopMatrix();
         }
     }
+
+    gDisplayStore.NextDLToken();
 
     glEnable(GL_TEXTURE_2D);
     glColor3ub(255, 255, 255);
@@ -774,6 +871,39 @@ void Display::AnimateModelObject(t3DObject *pObject, ModelDisplayListRecord* pDa
             glRotatef(rotDegree, vRotation.x, vRotation.y, vRotation.z);
         }
     }
+}
+
+void DisplayStore::NextDLToken()
+{
+    uint8 actualholder = DL_TOKENS_MAX;
+    uint8 nextcapable = DL_TOKENS_MAX;
+
+    for (uint8 i = 0; i < DL_TOKENS_MAX; i++)
+    {
+        if (DLTokenMap[i].HasToken)
+        {
+            actualholder = i;
+
+            if (i+1 != DL_TOKENS_MAX)
+                nextcapable = i+1;
+            else
+                nextcapable = 0;
+
+            if (!DLTokenMap[nextcapable].NeedsToken)
+                nextcapable = DL_TOKENS_MAX;
+        }
+    }
+
+    if (nextcapable >= DL_TOKENS_MAX)
+        nextcapable = 0; //0 needs token every time
+
+    ExtLog(nextcapable);
+
+    if (actualholder < DL_TOKENS_MAX)
+        DLTokenMap[actualholder].HasToken = false;
+
+    if (nextcapable < DL_TOKENS_MAX)
+        DLTokenMap[nextcapable].HasToken = true;
 }
 
 bool DisplayStore::IsAlreadyNeededTexture(uint32 TextureID)

@@ -146,9 +146,19 @@ void Network::HandlePacket(SmartPacket *data)
             uint32 lock;
             *data >> lock;
 
+            gDisplayStore.NeedDLToken(DL_TOKEN_NETWORKTHREAD);
+
+            while (!gDisplayStore.HasDLToken(DL_TOKEN_NETWORKTHREAD))
+            {
+                boost::this_thread::sleep(boost::posix_time::milliseconds(1));
+            }
+
             if (lock > 0)
                 gDisplay.SetGameState(GAME_MENU);
             gDisplay.SetGameStateStage(1);
+
+            gDisplayStore.UnNeedDLToken(DL_TOKEN_NETWORKTHREAD);
+            gDisplayStore.NextDLToken();
 
             SmartPacket data(CMSG_VALIDATE_VERSION);
             data << VERSION_STR;
@@ -182,8 +192,18 @@ void Network::HandlePacket(SmartPacket *data)
                 return;
 
             pField->fieldcontent = str.c_str();
+
+            gDisplayStore.NeedDLToken(DL_TOKEN_NETWORKTHREAD);
+
+            while (!gDisplayStore.HasDLToken(DL_TOKEN_NETWORKTHREAD))
+            {
+                boost::this_thread::sleep(boost::posix_time::milliseconds(1));
+            }
             gDisplay.SetGameState(GAME_CONNECTING);
             gDisplay.SetGameStateStage(0);
+
+            gDisplayStore.UnNeedDLToken(DL_TOKEN_NETWORKTHREAD);
+            gDisplayStore.NextDLToken();
             break;
         }
         case SMSG_ENTER_GAME_RESULT:
@@ -211,19 +231,49 @@ void Network::HandlePacket(SmartPacket *data)
             SetMyID(myId);
             m_myInstanceId = instanceId;
 
+            gDisplayStore.NeedDLToken(DL_TOKEN_NETWORKTHREAD);
+
+            while (!gDisplayStore.HasDLToken(DL_TOKEN_NETWORKTHREAD))
+            {
+                boost::this_thread::sleep(boost::posix_time::milliseconds(1));
+            }
+
             gDisplay.FlushModelDisplayList();
             gDisplay.InitModelDisplayList();
-            gDisplay.SetGameState(GAME_GAME);
+            gDisplay.SetGameState(GAME_LOADING);
+
+            gDisplayStore.UnNeedDLToken(DL_TOKEN_NETWORKTHREAD);
+            gDisplayStore.NextDLToken();
 
             break;
         }
-        case SMSG_MAP_OBJECT_DATA:
+        case SMSG_MAP_INITIAL_DATA:
         {
             uint32 count;
             uint32 tmpx, tmpy;
             uint8 type;
 
+            uint32 tmp_id;
+            float tmp_x, tmp_y;
+            uint8 tmp_offset;
+            std::string tmp_name;
+
+            for (uint8 i = 0; i < 4; i++)
+            {
+                *data >> tmp_id;
+                *data >> tmp_x >> tmp_y;
+                *data >> tmp_offset;
+                tmp_name = data->readstr();
+            }
+
             *data >> count;
+
+            gDisplayStore.NeedDLToken(DL_TOKEN_NETWORKTHREAD);
+
+            while (!gDisplayStore.HasDLToken(DL_TOKEN_NETWORKTHREAD))
+            {
+                boost::this_thread::sleep(boost::posix_time::milliseconds(1));
+            }
 
             for (int i = 0; i < count; i++)
             {
@@ -232,6 +282,12 @@ void Network::HandlePacket(SmartPacket *data)
                 if (type == 1)
                     gDisplay.DrawModel(tmpx-0.51f,0.0f,tmpy-0.51f,5,ANIM_IDLE,true,0.6f);
             }
+            gDisplay.SetGameState(GAME_GAME);
+            gDisplay.SetGameStateStage(255);
+
+            gDisplayStore.UnNeedDLToken(DL_TOKEN_NETWORKTHREAD);
+            gDisplayStore.NextDLToken();
+
             break;
         }
     }

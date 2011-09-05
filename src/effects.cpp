@@ -267,6 +267,11 @@ void Display::AnimWorker()
 
     while(1)
     {
+        while (!gDisplayStore.HasDLToken(DL_TOKEN_ANIMTHREAD))
+        {
+            boost::this_thread::sleep(boost::posix_time::milliseconds(1));
+        }
+
         for(std::vector<ModelDisplayListRecord*>::iterator itr = gDisplayStore.ModelDisplayList.begin(); itr != gDisplayStore.ModelDisplayList.end(); ++itr)
         {
             temp = *itr;
@@ -278,7 +283,7 @@ void Display::AnimWorker()
                 AnimLast = gDataStore.ModelData[temp->ModelID].AnimData[temp->Animation].last;
                 AnimInterval = gDataStore.ModelData[temp->ModelID].AnimData[temp->Animation].interval;
 
-                temp->AnimPassedInterval += 1;
+                temp->AnimPassedInterval += 2;
 
                 if (temp->AnimPassedInterval < AnimInterval)
                     continue;
@@ -298,11 +303,13 @@ void Display::AnimWorker()
                 }
             }
 
-            if(temp->AnimProgress == 0)
+            if(temp->AnimProgress == 0 && temp->Animation != ANIM_NONE)
                 temp->AnimProgress = 1;
         }
 
-        boost::this_thread::sleep(boost::posix_time::milliseconds(1));
+        gDisplayStore.NextDLToken();
+
+        boost::this_thread::sleep(boost::posix_time::milliseconds(2));
     }
 }
 

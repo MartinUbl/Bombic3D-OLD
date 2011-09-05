@@ -89,6 +89,20 @@ struct Map
     std::string mapname;
 };
 
+enum DisplayListTokens
+{
+    DL_TOKEN_MAINTHREAD    = 0,
+    DL_TOKEN_ANIMTHREAD    = 1,
+    DL_TOKEN_NETWORKTHREAD = 2,
+    DL_TOKENS_MAX
+};
+
+struct TokenMap
+{
+    bool NeedsToken;
+    bool HasToken;
+};
+
 extern void runAnimWorker();
 
 //Hlavni trida zobrazeni
@@ -100,6 +114,7 @@ public:
     float CalculateFloatZCoef();
     float CalculateFloatXCoef();
     void Initialize();
+    void LoadState();
     void DoTick();
     void DrawMenu();
     void DrawConnecting();
@@ -158,7 +173,7 @@ public:
     // Vykresleni skyboxu
     void DrawSkybox();
 
-    void SetGameState(GameState newstate) { m_gameState = newstate; }
+    void SetGameState(GameState newstate) { m_gameState = newstate; LoadState(); }
     GameState GetGameState() { return m_gameState; }
     void SetGameStateStage(uint8 newstage) { m_gameStateStage = newstage; }
     uint8 GetGameStateStage() { return m_gameStateStage; }
@@ -169,14 +184,19 @@ public:
 
     //Gameplay
     void PlantBomb();
+    void SetMapID(uint32 mapId) { m_mapId = mapId; };
+    uint32 GetMapID() { return m_mapId; };
 
 protected:
     GLfloat h_angle, v_angle;
     GLfloat view_x,view_y,view_z;
-    Map actmap; //relief aktualni mapy
+    Map actmap;
+    uint32 m_mapId; //aktualni mapa / mapa k nacteni
     uint32 LastTextureID;
 
     clock_t m_diff;
+
+    bool m_modelDisplayListContainer;
 
     GameState m_gameState;
     uint8 m_gameStateStage;
@@ -255,6 +275,20 @@ public:
         FloorTextures.clear();
         TextDisplayList.clear();
         ModelDisplayList.clear();
+
+        /*DLTokenMap = {
+            {true , true }, // main thread
+            {true , false}, // anim thread
+            {false, false}, // network thread
+        };*/
+
+        DLTokenMap[DL_TOKEN_MAINTHREAD].NeedsToken = true;
+        DLTokenMap[DL_TOKEN_ANIMTHREAD].NeedsToken = true;
+        DLTokenMap[DL_TOKEN_NETWORKTHREAD].NeedsToken = false;
+
+        DLTokenMap[DL_TOKEN_MAINTHREAD].HasToken = true;
+        DLTokenMap[DL_TOKEN_ANIMTHREAD].HasToken = false;
+        DLTokenMap[DL_TOKEN_NETWORKTHREAD].HasToken = false;
     };
     ~DisplayStore() {};
 
@@ -312,6 +346,14 @@ public:
     std::vector<ModelDisplayListRecord*> ModelDisplayList;
     //Display list pro billboardy
     std::vector<BillboardDisplayListRecord*> BillboardDisplayList;
+
+    TokenMap DLTokenMap[DL_TOKENS_MAX];
+
+    void NextDLToken();
+    bool HasDLToken(uint8 holder)    { if (holder >= DL_TOKENS_MAX) return false; else return DLTokenMap[holder].HasToken; };
+    bool DoNeedDLToken(uint8 holder) { if (holder >= DL_TOKENS_MAX) return false; else return DLTokenMap[holder].NeedsToken; };
+    void NeedDLToken(uint8 holder)   { if (holder >= DL_TOKENS_MAX) return; DLTokenMap[holder].NeedsToken = true; };
+    void UnNeedDLToken(uint8 holder) { if (holder >= DL_TOKENS_MAX) return; DLTokenMap[holder].NeedsToken = false; };
 
     t3DSLoader ModelLoader;
 };

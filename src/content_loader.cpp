@@ -103,6 +103,9 @@ void DisplayStore::LoadModels()
             //TODO: vyhodit error
             break;
         }
+        Models[ModelID].pMaterials.clear();
+        Models[ModelID].pObject.clear();
+        memset(&Models[ModelID],0,sizeof(t3DModel));
         if(!(ModelLoader.Import3DS(&Models[ModelID], (char*)ModelFilename)))
         {
             //TODO: vyhodit error

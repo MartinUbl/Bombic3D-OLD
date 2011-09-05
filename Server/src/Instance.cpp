@@ -149,6 +149,26 @@ int32 InstanceManager::GetPlayerInstanceId(Player *pPlayer)
         return -1;
 }
 
+void InstanceManager::RemovePlayerFromInstances(Player* pPlayer)
+{
+    if (m_Instances.empty())
+        return;
+
+    for (std::map<uint32, Instance*>::iterator itr = m_Instances.begin(); itr != m_Instances.end(); ++itr)
+    {
+        if (!itr->second)
+            continue;
+
+        for (uint8 i = 0; i < MAX_PLAYERS_PER_INSTANCE; i++)
+            if (itr->second->pPlayers[i] == pPlayer)
+            {
+                itr->second->pPlayers[i] = NULL;
+                if (itr->second->players > 0)
+                    itr->second->players -= 1;
+            }
+    }
+}
+
 void InstanceManager::SendInstancePacket(SmartPacket *data, uint32 instanceId)
 {
     Instance* pInstance = m_Instances[instanceId];
@@ -201,7 +221,7 @@ void Instance::GenerateRandomDynamicRecords()
         if (rand()%2 > 0)
         {
             temp.x = (*itr).first;
-            temp.x = (*itr).second;
+            temp.y = (*itr).second;
             temp.type = 1;
             m_dynRecords.push_back(temp);
         }

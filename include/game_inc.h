@@ -25,6 +25,7 @@
 #include <SDL.h>
 #include <SDL_net.h>
 #include <boost/thread.hpp>
+#include <boost/thread/mutex.hpp>
 
 //Definice nejpouzivanejsich typu
 //Inspirace z emulatoru MaNGOS

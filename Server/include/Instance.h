@@ -51,6 +51,8 @@ class InstanceManager
         Instance* GetPlayerInstance(Player* pPlayer);
         void SendInstancePacket(SmartPacket* data, uint32 instanceId);
 
+        void RemovePlayerFromInstances(Player* pPlayer);
+
         const char* GetInstanceString();
 
     private:

@@ -88,9 +88,20 @@ void t3DSLoader::ResizeObjects(t3DModel* pModel)
     {
         for(int i = 0; i <= pModel->numberOfFrames; ++i)
         {
+            if (pModel->pObject[index].vScale.size() <= i)
+            {
+                pModel->pObject[index].vScale.resize(pModel->pObject[index].vScale.size()+1);
+                pModel->pObject[index].vScale[i].x = 1;
+                pModel->pObject[index].vScale[i].y = 1;
+                pModel->pObject[index].vScale[i].z = 1;
+            }
+
             pModel->pObject[index].vScale[i].x *= MODEL_SCALE;
             pModel->pObject[index].vScale[i].y *= MODEL_SCALE;
             pModel->pObject[index].vScale[i].z *= MODEL_SCALE;
+
+            if (pModel->pObject[index].vPosition.size() <= i)
+                pModel->pObject[index].vPosition.resize(pModel->pObject[index].vPosition.size()+1);
 
             pModel->pObject[index].vPosition[i].x *= MODEL_SCALE;
             pModel->pObject[index].vPosition[i].y *= MODEL_SCALE;
@@ -436,7 +447,7 @@ int t3DSLoader::GetString(char *pBuffer)
     return strlen(pBuffer) + 1;
 }
 
-//Precte barvi v RGB formatu
+//Precte barvy v RGB formatu
 void t3DSLoader::ReadColorChunk(tMaterialInfo *pMaterial, tChunk *pChunk)
 {
     // Read the color chunk info

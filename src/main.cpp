@@ -247,7 +247,7 @@ int InitGL(GLvoid)
 
     glEnable(GL_TEXTURE_2D);        //Povoleni texturovani
     glShadeModel(GL_SMOOTH);        //Model shadingu
-    glClearColor(0.0f, 0.0f, 1.0f, 0.0f);    //Barva pozadi (default, zde modra)
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);    //Barva pozadi (default, zde modra)
     glClearDepth(1.0f);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
